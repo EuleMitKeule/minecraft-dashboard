@@ -7,6 +7,21 @@
 			"command": "cd frontend; npm run dev",
 			"isBackground": true,
 			"problemMatcher": []
+		},
+		{
+			"label": "Run Backend",
+			"type": "shell",
+			"command": "uv run minecraft_dashboard",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Application",
+			"dependsOn": [
+				"Run Frontend",
+				"Run Backend"
+			],
+			"problemMatcher": []
 		}
 	]
 }
