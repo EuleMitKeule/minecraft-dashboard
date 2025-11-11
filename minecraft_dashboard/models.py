@@ -13,6 +13,7 @@ class ConfigData(BaseModel):
     """Configuration data model."""
 
     use_mock_data: bool
+    polling_interval: int
 
 
 class PlayerSample(BaseModel):

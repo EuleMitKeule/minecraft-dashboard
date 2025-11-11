@@ -36,9 +36,11 @@ function App() {
   const [serverData, setServerData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [pollingInterval, setPollingInterval] = useState(5000)
+  const [useMockData, setUseMockData] = useState(false)
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchConfig = async () => {
       try {
         const configResponse = await client.GET('/config')
 
@@ -46,10 +48,28 @@ function App() {
           throw new Error('Failed to fetch configuration')
         }
 
-        const useMockData = configResponse.data.use_mock_data
+        setUseMockData(configResponse.data.use_mock_data)
+        setPollingInterval(configResponse.data.polling_interval)
+      } catch (err) {
+        console.error('Failed to fetch config:', err)
+      }
+    }
 
+    fetchConfig()
+
+    const configIntervalId = setInterval(fetchConfig, 5000)
+
+    return () => clearInterval(configIntervalId)
+  }, [])
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
         if (useMockData) {
-          setServerData(mockServerData)
+          setServerData({
+            ...mockServerData,
+            latency: Math.floor(Math.random() * (500 - 5 + 1)) + 5
+          })
         } else {
           const statusResponse = await client.GET('/status')
 
@@ -59,6 +79,7 @@ function App() {
 
           setServerData(statusResponse.data)
         }
+        setError(null)
       } catch (err) {
         setError(err.message)
       } finally {
@@ -66,8 +87,12 @@ function App() {
       }
     }
 
-    fetchData()
-  }, [])
+    fetchStatus()
+
+    const statusIntervalId = setInterval(fetchStatus, pollingInterval)
+
+    return () => clearInterval(statusIntervalId)
+  }, [useMockData, pollingInterval])
 
   if (loading) {
     return (

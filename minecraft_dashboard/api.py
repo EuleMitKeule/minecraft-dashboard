@@ -47,7 +47,10 @@ class DashboardApi(Routable):
     )
     async def get_config(self) -> ConfigData:
         """Get dashboard configuration endpoint."""
-        return ConfigData(use_mock_data=self.config.frontend_use_mock_data)
+        return ConfigData(
+            use_mock_data=self.config.frontend_use_mock_data,
+            polling_interval=self.config.frontend_polling_interval,
+        )
 
     @get(
         "/status",
