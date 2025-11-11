@@ -4,11 +4,14 @@ version = "0.0.0"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "classy-fastapi>=0.7.0",
     "colorlog>=6.10.1",
     "dataclass-wizard>=0.35.1",
     "fastapi>=0.121.1",
+    "mcstatus>=12.0.6",
     "python-dotenv>=1.2.1",
     "pyyaml>=6.0.3",
+    "typing-inspect>=0.9.0",
     "tzdata>=2025.2",
     "uvicorn>=0.38.0",
 ]

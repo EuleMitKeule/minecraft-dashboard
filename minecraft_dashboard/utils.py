@@ -9,6 +9,9 @@ from typing import Any, Callable, TypeVar, cast
 import colorlog
 from dataclass_wizard import json_field
 from dotenv import load_dotenv
+from mcstatus import JavaServer
+
+from minecraft_dashboard.models import StatusData
 
 T = TypeVar("T")
 
@@ -143,4 +146,25 @@ class LoggingUtils:
         logging.basicConfig(
             level=log_level.upper(),
             handlers=[file_handler, console_handler],
+        )
+
+
+class MinecraftUtils:
+    """Utility functions for Minecraft."""
+
+    @staticmethod
+    async def get_status(host: str, port: int, timeout: int) -> StatusData:
+        """Get the status of the Minecraft server."""
+        server = await JavaServer.async_lookup(f"{host}:{port}", timeout)
+        if not server:
+            return StatusData(online=False)
+
+        status = await server.async_status()
+        if not status:
+            return StatusData(online=False)
+
+        return StatusData(
+            online=True,
+            players_online=status.players.online,
+            max_players=status.players.max,
         )

@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
-from minecraft_dashboard.api import router
+from minecraft_dashboard.api import DashboardApi
 from minecraft_dashboard.config import Config
 from minecraft_dashboard.utils import LoggingUtils
 
@@ -33,8 +33,9 @@ def main():
 
     logging.info("Starting minecraft-dashboard...")
 
-    app.include_router(router)
-    uvicorn.run(app, host=config.host, port=config.port, log_config=None)
+    api = DashboardApi(config)
+    app.include_router(api.router)
+    uvicorn.run(app, host=config.api_host, port=config.api_port, log_config=None)
 
 
 if __name__ == "__main__":

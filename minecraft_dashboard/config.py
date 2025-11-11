@@ -18,6 +18,9 @@ from minecraft_dashboard.const import (
     CONF_LOG_FORMAT_FILE,
     CONF_LOG_LEVEL,
     CONF_LOG_PATH,
+    CONF_MINECRAFT_SERVER_HOST,
+    CONF_MINECRAFT_SERVER_PORT,
+    CONF_MINECRAFT_SERVER_TIMEOUT,
     CONF_PORT,
     DEFAULT_CONFIG_FILE_PATH,
     DEFAULT_HOST,
@@ -27,6 +30,9 @@ from minecraft_dashboard.const import (
     DEFAULT_LOG_FORMAT_FILE,
     DEFAULT_LOG_LEVEL,
     DEFAULT_LOG_PATH,
+    DEFAULT_MINECRAFT_SERVER_HOST,
+    DEFAULT_MINECRAFT_SERVER_PORT,
+    DEFAULT_MINECRAFT_SERVER_TIMEOUT,
     DEFAULT_PORT,
     ENV_CONFIG_FILE_PATH,
     ENV_HOST,
@@ -36,6 +42,9 @@ from minecraft_dashboard.const import (
     ENV_LOG_FORMAT_FILE,
     ENV_LOG_LEVEL,
     ENV_LOG_PATH,
+    ENV_MINECRAFT_SERVER_HOST,
+    ENV_MINECRAFT_SERVER_PORT,
+    ENV_MINECRAFT_SERVER_TIMEOUT,
     ENV_PORT,
 )
 from minecraft_dashboard.utils import DataclassUtils
@@ -51,12 +60,12 @@ class Config(YAMLWizard, JSONWizard):
         DEFAULT_CONFIG_FILE_PATH,
         Path,
     )
-    host: str = DataclassUtils.field(
+    api_host: str = DataclassUtils.field(
         CONF_HOST,
         ENV_HOST,
         DEFAULT_HOST,
     )
-    port: int = DataclassUtils.field(CONF_PORT, ENV_PORT, DEFAULT_PORT)
+    api_port: int = DataclassUtils.field(CONF_PORT, ENV_PORT, DEFAULT_PORT)
     log_path: Path = DataclassUtils.field(
         CONF_LOG_PATH,
         ENV_LOG_PATH,
@@ -87,6 +96,21 @@ class Config(YAMLWizard, JSONWizard):
         CONF_LOG_FILEMODE,
         ENV_LOG_FILEMODE,
         DEFAULT_LOG_FILEMODE,
+    )
+    minecraft_server_host: str = DataclassUtils.field(
+        CONF_MINECRAFT_SERVER_HOST,
+        ENV_MINECRAFT_SERVER_HOST,
+        DEFAULT_MINECRAFT_SERVER_HOST,
+    )
+    minecraft_server_port: int = DataclassUtils.field(
+        CONF_MINECRAFT_SERVER_PORT,
+        ENV_MINECRAFT_SERVER_PORT,
+        DEFAULT_MINECRAFT_SERVER_PORT,
+    )
+    minecraft_server_timeout: int = DataclassUtils.field(
+        CONF_MINECRAFT_SERVER_TIMEOUT,
+        ENV_MINECRAFT_SERVER_TIMEOUT,
+        DEFAULT_MINECRAFT_SERVER_TIMEOUT,
     )
 
     def save(self) -> None:
