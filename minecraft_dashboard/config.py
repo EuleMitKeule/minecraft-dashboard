@@ -24,7 +24,9 @@ from minecraft_dashboard.const import (
     CONF_LOG_LEVEL,
     CONF_LOG_PATH,
     CONF_MINECRAFT_SERVER_HOST,
+    CONF_MINECRAFT_SERVER_HOST_EXTERNAL,
     CONF_MINECRAFT_SERVER_PORT,
+    CONF_MINECRAFT_SERVER_PORT_EXTERNAL,
     CONF_MINECRAFT_SERVER_TIMEOUT,
     CONF_PORT,
     DEFAULT_CONFIG_FILE_PATH,
@@ -41,7 +43,9 @@ from minecraft_dashboard.const import (
     DEFAULT_LOG_LEVEL,
     DEFAULT_LOG_PATH,
     DEFAULT_MINECRAFT_SERVER_HOST,
+    DEFAULT_MINECRAFT_SERVER_HOST_EXTERNAL,
     DEFAULT_MINECRAFT_SERVER_PORT,
+    DEFAULT_MINECRAFT_SERVER_PORT_EXTERNAL,
     DEFAULT_MINECRAFT_SERVER_TIMEOUT,
     DEFAULT_PORT,
     ENV_CONFIG_FILE_PATH,
@@ -58,7 +62,9 @@ from minecraft_dashboard.const import (
     ENV_LOG_LEVEL,
     ENV_LOG_PATH,
     ENV_MINECRAFT_SERVER_HOST,
+    ENV_MINECRAFT_SERVER_HOST_EXTERNAL,
     ENV_MINECRAFT_SERVER_PORT,
+    ENV_MINECRAFT_SERVER_PORT_EXTERNAL,
     ENV_MINECRAFT_SERVER_TIMEOUT,
     ENV_PORT,
 )
@@ -122,6 +128,16 @@ class Config(YAMLWizard, JSONWizard):
         ENV_MINECRAFT_SERVER_PORT,
         DEFAULT_MINECRAFT_SERVER_PORT,
     )
+    minecraft_server_host_external: str | None = DataclassUtils.field(
+        CONF_MINECRAFT_SERVER_HOST_EXTERNAL,
+        ENV_MINECRAFT_SERVER_HOST_EXTERNAL,
+        DEFAULT_MINECRAFT_SERVER_HOST_EXTERNAL,
+    )
+    minecraft_server_port_external: int | None = DataclassUtils.field(
+        CONF_MINECRAFT_SERVER_PORT_EXTERNAL,
+        ENV_MINECRAFT_SERVER_PORT_EXTERNAL,
+        DEFAULT_MINECRAFT_SERVER_PORT_EXTERNAL,
+    )
     minecraft_server_timeout: int = DataclassUtils.field(
         CONF_MINECRAFT_SERVER_TIMEOUT,
         ENV_MINECRAFT_SERVER_TIMEOUT,
@@ -152,6 +168,16 @@ class Config(YAMLWizard, JSONWizard):
         ENV_FRONTEND_HEADER_TITLE,
         DEFAULT_FRONTEND_HEADER_TITLE,
     )
+
+    @property
+    def effective_minecraft_server_host_external(self) -> str:
+        """Get the effective external host, falling back to internal host if not set."""
+        return self.minecraft_server_host_external or self.minecraft_server_host
+
+    @property
+    def effective_minecraft_server_port_external(self) -> int:
+        """Get the effective external port, falling back to internal port if not set."""
+        return self.minecraft_server_port_external or self.minecraft_server_port
 
     def save(self) -> None:
         """Write the configuration to a file."""

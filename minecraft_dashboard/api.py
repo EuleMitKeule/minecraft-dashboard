@@ -43,12 +43,17 @@ class DashboardApi(Routable):
     )
     async def get_config(self) -> ConfigData:
         """Get dashboard configuration endpoint."""
+        external_host = self.config.effective_minecraft_server_host_external
+        external_port = self.config.effective_minecraft_server_port_external
+        server_address = f"{external_host}:{external_port}"
+
         return ConfigData(
             use_mock_data=self.config.frontend_use_mock_data,
             polling_interval=self.config.frontend_polling_interval,
             simulate_offline=self.config.frontend_simulate_offline,
             page_title=self.config.frontend_page_title,
             header_title=self.config.frontend_header_title,
+            server_address=server_address,
         )
 
     @get(

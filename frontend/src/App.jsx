@@ -20,7 +20,7 @@ const mockServerData = {
     ]
   },
   version: {
-    name: '1.21.1',
+    name: 'Paper 1.21.1',
     protocol: 767
   },
   description: 'A friendly Minecraft server',
@@ -46,6 +46,12 @@ const mockServerOfflineData = {
   forge_data: null
 }
 
+const mockConfigData = {
+  page_title: 'Mock Minecraft Server',
+  header_title: 'Mock Server Dashboard',
+  server_address: 'some.mock.server.example:25565'
+}
+
 function App() {
   const [serverData, setServerData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -56,6 +62,7 @@ function App() {
   const [configLoaded, setConfigLoaded] = useState(false)
   const [pageTitle, setPageTitle] = useState('Minecraft Server Dashboard')
   const [headerTitle, setHeaderTitle] = useState('Minecraft Server Dashboard')
+  const [serverAddress, setServerAddress] = useState('')
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -69,8 +76,17 @@ function App() {
         setUseMockData(configResponse.data.use_mock_data)
         setPollingInterval(configResponse.data.polling_interval)
         setSimulateOffline(configResponse.data.simulate_offline)
-        setPageTitle(configResponse.data.page_title)
-        setHeaderTitle(configResponse.data.header_title)
+
+        if (configResponse.data.use_mock_data) {
+          setPageTitle(mockConfigData.page_title)
+          setHeaderTitle(mockConfigData.header_title)
+          setServerAddress(mockConfigData.server_address)
+        } else {
+          setPageTitle(configResponse.data.page_title)
+          setHeaderTitle(configResponse.data.header_title)
+          setServerAddress(configResponse.data.server_address || '')
+        }
+
         setConfigLoaded(true)
       } catch (err) {
         console.error('Failed to fetch config:', err)
@@ -155,7 +171,7 @@ function App() {
             {headerTitle}
           </h1>
           <p className="subtitle">
-            {serverData.version?.name || 'Unknown Version'}
+            {serverAddress} • {serverData.version?.name || 'Unknown Version'}
           </p>
         </div>
       </header>
@@ -163,7 +179,7 @@ function App() {
       <main className="main">
         <div className="container">
           <div className="grid">
-            <ServerStatusCard server={serverData} />
+            <ServerStatusCard server={serverData} connectionAddress={serverAddress} />
             <ServerInfoCard server={serverData} />
             <PlayerListCard players={serverData.players} />
           </div>

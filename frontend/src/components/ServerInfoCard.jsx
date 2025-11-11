@@ -52,14 +52,13 @@ function ServerInfoCard({ server }) {
                     </div>
                 )}
 
-                {server.description && (
+                {server.motd_html && (
                     <div className="info-section">
-                        <h3 className="section-title">Description</h3>
-                        <div className="info-list">
-                            <div className="info-item">
-                                <span className="info-value">{server.description}</span>
-                            </div>
-                        </div>
+                        <h3 className="section-title">Message of the Day</h3>
+                        <div
+                            className="motd-content"
+                            dangerouslySetInnerHTML={{ __html: server.motd_html }}
+                        />
                     </div>
                 )}
             </div>

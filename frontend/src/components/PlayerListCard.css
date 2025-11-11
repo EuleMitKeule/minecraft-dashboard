@@ -23,6 +23,25 @@
     border-radius: 8px;
     border: 1px solid rgba(139, 92, 246, 0.1);
     transition: all 0.2s;
+    overflow-x: auto;
+}
+
+.player-item::-webkit-scrollbar {
+    height: 6px;
+}
+
+.player-item::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+}
+
+.player-item::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.4);
+    border-radius: 3px;
+}
+
+.player-item::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.6);
 }
 
 .player-item:hover {
@@ -58,12 +77,14 @@
     font-weight: 600;
     color: #e0e0e0;
     font-size: 1rem;
+    white-space: nowrap;
 }
 
 .player-uuid {
     font-size: 0.85rem;
     color: #9ca3af;
     font-family: 'Courier New', monospace;
+    white-space: nowrap;
 }
 
 .empty-state {
@@ -83,4 +104,16 @@
 
 .empty-state p {
     font-size: 1rem;
+}
+
+.card {
+    background: rgba(30, 30, 46, 0.7);
+    border-radius: 12px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    max-width: 480px;
+    width: 100%;
 }

@@ -1,6 +1,21 @@
+import { useState } from 'react'
 import './ServerStatusCard.css'
 
-function ServerStatusCard({ server }) {
+function ServerStatusCard({ server, connectionAddress }) {
+    const [copyButtonText, setCopyButtonText] = useState('📋')
+
+    const handleCopyAddress = async () => {
+        if (!connectionAddress) return
+
+        try {
+            await navigator.clipboard.writeText(connectionAddress)
+            setCopyButtonText('✓')
+            setTimeout(() => setCopyButtonText('📋'), 2000)
+        } catch (error) {
+            console.error('Failed to copy:', error)
+        }
+    }
+
     return (
         <div className="card">
             <div className="card-header">
@@ -11,6 +26,22 @@ function ServerStatusCard({ server }) {
             </div>
 
             <div className="card-content">
+                {connectionAddress && (
+                    <div className="quick-connect-bar">
+                        <div className="quick-connect-info">
+                            <span className="quick-connect-label">Quick Connect</span>
+                            <span className="quick-connect-address">{connectionAddress}</span>
+                        </div>
+                        <button
+                            className="quick-connect-copy-button"
+                            onClick={handleCopyAddress}
+                            title="Copy to clipboard"
+                        >
+                            {copyButtonText}
+                        </button>
+                    </div>
+                )}
+
                 <div className="status-grid">
                     <div className="status-item">
                         <span className="status-label">Players</span>
@@ -36,16 +67,6 @@ function ServerStatusCard({ server }) {
                         </div>
                     )}
                 </div>
-
-                {server.motd_html && (
-                    <div className="motd-section">
-                        <h3 className="section-title">Message of the Day</h3>
-                        <div
-                            className="motd-content"
-                            dangerouslySetInnerHTML={{ __html: server.motd_html }}
-                        />
-                    </div>
-                )}
 
                 {server.players && (
                     <div className="player-bar">

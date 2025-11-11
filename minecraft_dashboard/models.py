@@ -17,6 +17,7 @@ class ConfigData(BaseModel):
     simulate_offline: bool
     page_title: str
     header_title: str
+    server_address: str
 
 
 class PlayerSample(BaseModel):

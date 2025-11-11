@@ -6,6 +6,8 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s, box-shadow 0.2s;
+    max-width: 480px;
+    width: 100%;
 }
 
 .card:hover {
@@ -50,7 +52,89 @@
 .card-content {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
+}
+
+.quick-connect-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.quick-connect-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.quick-connect-label {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.quick-connect-address {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #a78bfa;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.quick-connect-address::-webkit-scrollbar {
+    height: 8px;
+}
+
+.quick-connect-address::-webkit-scrollbar-track {
+    background: rgba(139, 92, 246, 0.1);
+    margin-top: 0.25rem;
+    border-radius: 4px;
+}
+
+.quick-connect-address::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.5);
+    border-radius: 4px;
+}
+
+.quick-connect-address::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.8);
+}
+
+.quick-connect-copy-button {
+    padding: 0.5rem 1rem;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    border-radius: 6px;
+    color: #a78bfa;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    flex-shrink: 0;
+}
+
+.quick-connect-copy-button:hover {
+    background: rgba(139, 92, 246, 0.3);
+    border-color: rgba(139, 92, 246, 0.6);
+    transform: scale(1.05);
+}
+
+.quick-connect-copy-button:active {
+    transform: scale(0.95);
 }
 
 .status-grid {
