@@ -47,6 +47,8 @@ class DashboardApi(Routable):
             use_mock_data=self.config.frontend_use_mock_data,
             polling_interval=self.config.frontend_polling_interval,
             simulate_offline=self.config.frontend_simulate_offline,
+            page_title=self.config.frontend_page_title,
+            header_title=self.config.frontend_header_title,
         )
 
     @get(

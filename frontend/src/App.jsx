@@ -54,6 +54,8 @@ function App() {
   const [useMockData, setUseMockData] = useState(null)
   const [simulateOffline, setSimulateOffline] = useState(false)
   const [configLoaded, setConfigLoaded] = useState(false)
+  const [pageTitle, setPageTitle] = useState('Minecraft Server Dashboard')
+  const [headerTitle, setHeaderTitle] = useState('Minecraft Server Dashboard')
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -67,6 +69,8 @@ function App() {
         setUseMockData(configResponse.data.use_mock_data)
         setPollingInterval(configResponse.data.polling_interval)
         setSimulateOffline(configResponse.data.simulate_offline)
+        setPageTitle(configResponse.data.page_title)
+        setHeaderTitle(configResponse.data.header_title)
         setConfigLoaded(true)
       } catch (err) {
         console.error('Failed to fetch config:', err)
@@ -117,6 +121,10 @@ function App() {
     return () => clearInterval(statusIntervalId)
   }, [useMockData, simulateOffline, pollingInterval, configLoaded])
 
+  useEffect(() => {
+    document.title = pageTitle
+  }, [pageTitle])
+
   if (loading) {
     return (
       <div className="app">
@@ -144,7 +152,7 @@ function App() {
         <div className="container">
           <h1 className="title">
             <span className="title-icon">⛏️</span>
-            Minecraft Server Dashboard
+            {headerTitle}
           </h1>
           <p className="subtitle">
             {serverData.version?.name || 'Unknown Version'}
