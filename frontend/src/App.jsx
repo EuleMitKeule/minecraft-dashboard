@@ -32,12 +32,27 @@ const mockServerData = {
   forge_data: null
 }
 
+const mockServerOfflineData = {
+  online: false,
+  latency: null,
+  players: null,
+  version: null,
+  description: null,
+  motd_plain: null,
+  motd_html: null,
+  enforces_secure_chat: null,
+  has_icon: false,
+  icon_base64: null,
+  forge_data: null
+}
+
 function App() {
   const [serverData, setServerData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [pollingInterval, setPollingInterval] = useState(5000)
   const [useMockData, setUseMockData] = useState(null)
+  const [simulateOffline, setSimulateOffline] = useState(false)
   const [configLoaded, setConfigLoaded] = useState(false)
 
   useEffect(() => {
@@ -51,6 +66,7 @@ function App() {
 
         setUseMockData(configResponse.data.use_mock_data)
         setPollingInterval(configResponse.data.polling_interval)
+        setSimulateOffline(configResponse.data.simulate_offline)
         setConfigLoaded(true)
       } catch (err) {
         console.error('Failed to fetch config:', err)
@@ -70,10 +86,12 @@ function App() {
 
     const fetchStatus = async () => {
       try {
-        if (useMockData) {
+        if (simulateOffline) {
+          setServerData(mockServerOfflineData)
+        } else if (useMockData) {
           setServerData({
             ...mockServerData,
-            latency: Math.floor(Math.random() * (500 - 5 + 1)) + 5
+            latency: Math.round(Math.random() * (500 - 5 + 1)) + 5
           })
         } else {
           const statusResponse = await client.GET('/status')
@@ -97,7 +115,7 @@ function App() {
     const statusIntervalId = setInterval(fetchStatus, pollingInterval)
 
     return () => clearInterval(statusIntervalId)
-  }, [useMockData, pollingInterval, configLoaded])
+  }, [useMockData, simulateOffline, pollingInterval, configLoaded])
 
   if (loading) {
     return (

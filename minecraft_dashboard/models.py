@@ -14,6 +14,7 @@ class ConfigData(BaseModel):
 
     use_mock_data: bool
     polling_interval: int
+    simulate_offline: bool
 
 
 class PlayerSample(BaseModel):

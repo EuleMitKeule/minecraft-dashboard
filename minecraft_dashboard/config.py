@@ -12,6 +12,7 @@ from pydantic.dataclasses import dataclass
 from minecraft_dashboard.const import (
     CONF_CONFIG_FILE_PATH,
     CONF_FRONTEND_POLLING_INTERVAL,
+    CONF_FRONTEND_SIMULATE_OFFLINE,
     CONF_FRONTEND_USE_MOCK_DATA,
     CONF_HOST,
     CONF_LOG_DATE_FORMAT,
@@ -26,6 +27,7 @@ from minecraft_dashboard.const import (
     CONF_PORT,
     DEFAULT_CONFIG_FILE_PATH,
     DEFAULT_FRONTEND_POLLING_INTERVAL,
+    DEFAULT_FRONTEND_SIMULATE_OFFLINE,
     DEFAULT_FRONTEND_USE_MOCK_DATA,
     DEFAULT_HOST,
     DEFAULT_LOG_DATE_FORMAT,
@@ -40,6 +42,7 @@ from minecraft_dashboard.const import (
     DEFAULT_PORT,
     ENV_CONFIG_FILE_PATH,
     ENV_FRONTEND_POLLING_INTERVAL,
+    ENV_FRONTEND_SIMULATE_OFFLINE,
     ENV_FRONTEND_USE_MOCK_DATA,
     ENV_HOST,
     ENV_LOG_DATE_FORMAT,
@@ -127,6 +130,11 @@ class Config(YAMLWizard, JSONWizard):
         CONF_FRONTEND_POLLING_INTERVAL,
         ENV_FRONTEND_POLLING_INTERVAL,
         DEFAULT_FRONTEND_POLLING_INTERVAL,
+    )
+    frontend_simulate_offline: bool = DataclassUtils.field(
+        CONF_FRONTEND_SIMULATE_OFFLINE,
+        ENV_FRONTEND_SIMULATE_OFFLINE,
+        DEFAULT_FRONTEND_SIMULATE_OFFLINE,
     )
 
     def save(self) -> None:

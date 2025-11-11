@@ -228,7 +228,7 @@ class MinecraftUtils:
 
         return StatusData(
             online=True,
-            latency=status.latency,
+            latency=round(status.latency),
             players=players_info,
             version=version_info,
             description=status.description,
