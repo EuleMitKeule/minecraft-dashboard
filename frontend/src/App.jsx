@@ -9,14 +9,14 @@ const mockServerData = {
   online: true,
   latency: 45,
   players: {
-    online: 3,
+    online: 5,
     max: 20,
     sample: [
-      { name: 'Steve', id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
-      { name: 'Alex', id: 'b2c3d4e5-f6a7-8901-bcde-f12345678901' },
-      { name: 'Notch', id: 'c3d4e5f6-a7b8-9012-cdef-123456789012' },
-      { name: 'Honeydew', id: 'c3d4e5f6-a7b8-9012-cdef-123456789012' },
-      { name: 'BlueXephos', id: 'c3d4e5f6-a7b8-9012-cdef-123456789012' },
+      { name: 'Steve', id: '8667ba71-b85a-4004-af54-457a9734eed7' },
+      { name: 'Alex', id: 'ec561538-f3fd-461d-aff5-086b22154bce' },
+      { name: 'Notch', id: '069a79f4-44e9-4726-a5be-fca90e38aaf5' },
+      { name: 'Honeydew', id: '8f9bc2ed-1bb5-41ed-91be-02625c76bd7f' },
+      { name: 'BlueXephos', id: '2c6d7b3d-7674-4b18-8d86-bb6a707ea8e4' },
     ]
   },
   version: {

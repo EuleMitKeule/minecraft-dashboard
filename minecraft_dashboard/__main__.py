@@ -13,11 +13,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from minecraft_dashboard.api import DashboardApi
 from minecraft_dashboard.config import Config
 from minecraft_dashboard.utils import LoggingUtils, OpenApiUtils
+from minecraft_dashboard.watcher import ConfigurationWatcher
+
+api_instance = None
+configuration_watcher = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global configuration_watcher
+    if configuration_watcher:
+        await configuration_watcher.start()
     yield
+    if configuration_watcher:
+        await configuration_watcher.stop()
 
 
 app = FastAPI(
@@ -37,6 +46,8 @@ app.add_middleware(
 
 
 def main():
+    global api_instance, configuration_watcher
+
     parser = argparse.ArgumentParser(description="Minecraft Dashboard Server")
     parser.add_argument(
         "--generate-openapi",
@@ -57,8 +68,12 @@ def main():
         config.log_filemode,
     )
 
-    api = DashboardApi(config)
-    app.include_router(api.router)
+    api_instance = DashboardApi(config)
+    app.include_router(api_instance.router)
+
+    configuration_watcher = ConfigurationWatcher(
+        config, api_instance.reload_configuration
+    )
 
     if arguments.generate_openapi:
         output_path = Path(arguments.generate_openapi)

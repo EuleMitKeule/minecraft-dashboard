@@ -1,5 +1,7 @@
 """API module for minecraft-dashboard."""
 
+import logging
+
 from classy_fastapi import get
 from classy_fastapi.routable import Routable
 from fastapi import APIRouter
@@ -18,6 +20,12 @@ class DashboardApi(Routable):
         """Initialize the Dashboard API."""
         super().__init__()
         self.config = config
+
+    def reload_configuration(self, new_configuration: Config) -> None:
+        """Reload the configuration."""
+        logging.info("Reloading API configuration...")
+        self.config = new_configuration
+        logging.info("API configuration reloaded successfully")
 
     @get(
         "/health",

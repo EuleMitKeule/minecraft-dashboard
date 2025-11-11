@@ -138,7 +138,7 @@ class Config(YAMLWizard, JSONWizard):
         return config
 
     @classmethod
-    def load(cls) -> Config:
+    def load(cls, save_after_load: bool = True) -> Config:
         """Read the configuration from a file."""
         config = Config()
 
@@ -150,5 +150,6 @@ class Config(YAMLWizard, JSONWizard):
 
         config = cls.from_dict(config_dict)
         DataclassUtils.check_config_env_mismatch(config)
-        config.save()
+        if save_after_load:
+            config.save()
         return config
