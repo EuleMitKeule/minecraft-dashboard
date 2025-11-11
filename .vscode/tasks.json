@@ -2,16 +2,25 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "Generate API Client",
+			"type": "shell",
+			"command": "node scripts/generate-client.js",
+			"problemMatcher": []
+		},
+		{
 			"label": "Run Frontend",
 			"type": "shell",
 			"command": "cd frontend; npm run dev",
 			"isBackground": true,
+			"dependsOn": [
+				"Generate API Client"
+			],
 			"problemMatcher": []
 		},
 		{
 			"label": "Run Backend",
 			"type": "shell",
-			"command": "uv run minecraft_dashboard",
+			"command": "uv run python -m minecraft_dashboard",
 			"isBackground": true,
 			"problemMatcher": []
 		},
@@ -21,6 +30,10 @@
 				"Run Frontend",
 				"Run Backend"
 			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
 			"problemMatcher": []
 		}
 	]

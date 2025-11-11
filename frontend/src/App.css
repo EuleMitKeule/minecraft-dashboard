@@ -73,6 +73,17 @@
     }
 }
 
+.error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 1rem;
+    color: #ef4444;
+    font-size: 1.2rem;
+}
+
 .footer {
     background: rgba(0, 0, 0, 0.3);
     padding: 1.5rem 0;

@@ -1,5 +1,6 @@
 """Utility functions for minecraft-dashboard."""
 
+import json
 import logging
 import os
 import sys
@@ -238,3 +239,20 @@ class MinecraftUtils:
             icon_base64=status.icon,
             forge_data=forge_info,
         )
+
+
+class OpenApiUtils:
+    """Utility functions for OpenAPI specification generation."""
+
+    @staticmethod
+    def generate_openapi_spec(application: Any, output_path: Path) -> dict:
+        """Generate OpenAPI specification from a FastAPI application."""
+        openapi_schema = application.openapi()
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with output_path.open("w", encoding="utf-8") as file:
+            json.dump(openapi_schema, file, indent=2, ensure_ascii=False)
+
+        logger.info(f"OpenAPI specification written to {output_path}")
+
+        return openapi_schema
