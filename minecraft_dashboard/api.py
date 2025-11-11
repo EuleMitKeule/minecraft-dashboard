@@ -5,7 +5,7 @@ from classy_fastapi.routable import Routable
 from fastapi import APIRouter
 
 from minecraft_dashboard.config import Config
-from minecraft_dashboard.models import HealthCheckData, StatusData
+from minecraft_dashboard.models import ConfigData, HealthCheckData, StatusData
 from minecraft_dashboard.utils import MinecraftUtils
 
 router = APIRouter()
@@ -29,6 +29,17 @@ class DashboardApi(Routable):
     async def health_check(self) -> HealthCheckData:
         """Health check endpoint."""
         return HealthCheckData()
+
+    @get(
+        "/config",
+        summary="Get dashboard configuration",
+        tags=["Config"],
+        status_code=200,
+        response_model=ConfigData,
+    )
+    async def get_config(self) -> ConfigData:
+        """Get dashboard configuration endpoint."""
+        return ConfigData(use_mock_data=self.config.frontend_use_mock_data)
 
     @get(
         "/status",

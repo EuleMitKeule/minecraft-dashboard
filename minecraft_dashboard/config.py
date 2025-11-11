@@ -11,6 +11,7 @@ from pydantic.dataclasses import dataclass
 
 from minecraft_dashboard.const import (
     CONF_CONFIG_FILE_PATH,
+    CONF_FRONTEND_USE_MOCK_DATA,
     CONF_HOST,
     CONF_LOG_DATE_FORMAT,
     CONF_LOG_FILEMODE,
@@ -23,6 +24,7 @@ from minecraft_dashboard.const import (
     CONF_MINECRAFT_SERVER_TIMEOUT,
     CONF_PORT,
     DEFAULT_CONFIG_FILE_PATH,
+    DEFAULT_FRONTEND_USE_MOCK_DATA,
     DEFAULT_HOST,
     DEFAULT_LOG_DATE_FORMAT,
     DEFAULT_LOG_FILEMODE,
@@ -35,6 +37,7 @@ from minecraft_dashboard.const import (
     DEFAULT_MINECRAFT_SERVER_TIMEOUT,
     DEFAULT_PORT,
     ENV_CONFIG_FILE_PATH,
+    ENV_FRONTEND_USE_MOCK_DATA,
     ENV_HOST,
     ENV_LOG_DATE_FORMAT,
     ENV_LOG_FILEMODE,
@@ -111,6 +114,11 @@ class Config(YAMLWizard, JSONWizard):
         CONF_MINECRAFT_SERVER_TIMEOUT,
         ENV_MINECRAFT_SERVER_TIMEOUT,
         DEFAULT_MINECRAFT_SERVER_TIMEOUT,
+    )
+    frontend_use_mock_data: bool = DataclassUtils.field(
+        CONF_FRONTEND_USE_MOCK_DATA,
+        ENV_FRONTEND_USE_MOCK_DATA,
+        DEFAULT_FRONTEND_USE_MOCK_DATA,
     )
 
     def save(self) -> None:

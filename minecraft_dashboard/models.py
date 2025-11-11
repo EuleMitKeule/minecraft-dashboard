@@ -9,6 +9,12 @@ class HealthCheckData(BaseModel):
     status: str = "ok"
 
 
+class ConfigData(BaseModel):
+    """Configuration data model."""
+
+    use_mock_data: bool
+
+
 class PlayerSample(BaseModel):
     """Player sample data model."""
 
