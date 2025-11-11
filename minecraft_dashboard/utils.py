@@ -11,7 +11,14 @@ from dataclass_wizard import json_field
 from dotenv import load_dotenv
 from mcstatus import JavaServer
 
-from minecraft_dashboard.models import StatusData
+from minecraft_dashboard.models import (
+    ForgeInfo,
+    ForgeModInfo,
+    PlayerSample,
+    PlayersInfo,
+    StatusData,
+    VersionInfo,
+)
 
 T = TypeVar("T")
 
@@ -159,12 +166,75 @@ class MinecraftUtils:
         if not server:
             return StatusData(online=False)
 
-        status = await server.async_status()
+        try:
+            status = await server.async_status()
+        except Exception:
+            return StatusData(online=False)
+
         if not status:
             return StatusData(online=False)
 
+        players_info = PlayersInfo(
+            online=status.players.online,
+            max=status.players.max,
+            sample=[
+                PlayerSample(name=player.name, id=player.id)
+                for player in (status.players.sample or [])
+            ]
+            if status.players.sample
+            else None,
+        )
+
+        version_info = VersionInfo(
+            name=status.version.name,
+            protocol=status.version.protocol,
+        )
+
+        forge_info = None
+        if status.forge_data:
+            forge_mods = None
+            if status.forge_data.mods:
+                forge_mods = [
+                    ForgeModInfo(
+                        name=mod.name,
+                        marker=mod.marker,
+                    )
+                    for mod in status.forge_data.mods
+                ]
+
+            forge_info = ForgeInfo(
+                mods=forge_mods,
+                channels=[
+                    {
+                        "name": channel.name,
+                        "version": channel.version,
+                        "required": channel.required,
+                    }
+                    for channel in (status.forge_data.channels or [])
+                ]
+                if status.forge_data.channels
+                else None,
+                fml_network_version=status.forge_data.fml_network_version,
+            )
+
+        motd_plain = None
+        motd_html = None
+        try:
+            motd_plain = status.motd.to_plain()
+            motd_html = status.motd.to_html()
+        except Exception:
+            pass
+
         return StatusData(
             online=True,
-            players_online=status.players.online,
-            max_players=status.players.max,
+            latency=status.latency,
+            players=players_info,
+            version=version_info,
+            description=status.description,
+            motd_plain=motd_plain,
+            motd_html=motd_html,
+            enforces_secure_chat=status.enforces_secure_chat,
+            has_icon=status.icon is not None,
+            icon_base64=status.icon,
+            forge_data=forge_info,
         )

@@ -24,6 +24,7 @@ class DashboardApi(Routable):
         summary="Perform a health check",
         tags=["Health"],
         status_code=200,
+        response_model=HealthCheckData,
     )
     async def health_check(self) -> HealthCheckData:
         """Health check endpoint."""
@@ -34,6 +35,7 @@ class DashboardApi(Routable):
         summary="Get the status of the Minecraft server",
         tags=["Status"],
         status_code=200,
+        response_model=StatusData,
     )
     async def get_status(self) -> StatusData:
         """Get the status of the Minecraft server."""
