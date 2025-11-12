@@ -156,7 +156,7 @@ class LoggingUtils:
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(color_formatter)
 
-        handlers = [console_handler]
+        handlers: list[logging.Handler] = [console_handler]
 
         if log_path and not log_path.is_dir():
             log_path.parent.mkdir(parents=True, exist_ok=True)
