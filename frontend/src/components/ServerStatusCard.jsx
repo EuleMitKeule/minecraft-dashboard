@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import Card from './Card'
+import InfoCard from './InfoCard'
 import './ServerStatusCard.css'
 
 function ServerStatusCard({ server, connectionAddress }) {
@@ -16,22 +18,18 @@ function ServerStatusCard({ server, connectionAddress }) {
         }
     }
 
-    return (
-        <div className="card">
-            <div className="card-header">
-                <h2 className="card-title">Server Status</h2>
-                <span className={`status-badge ${server.online ? 'online' : 'offline'}`}>
-                    {server.online ? '🟢 Online' : '🔴 Offline'}
-                </span>
-            </div>
+    const statusBadge = {
+        text: server.online ? '🟢 Online' : '🔴 Offline',
+        variant: server.online ? 'online' : 'offline'
+    }
 
-            <div className="card-content">
-                {connectionAddress && (
-                    <div className="quick-connect-bar">
-                        <div className="quick-connect-info">
-                            <span className="quick-connect-label">Quick Connect</span>
-                            <span className="quick-connect-address">{connectionAddress}</span>
-                        </div>
+    return (
+        <Card title="Server Status" badge={statusBadge}>
+            <div className="card-grid">
+                <InfoCard
+                    title="Quick Connect"
+                    fullWidth={true}
+                    action={
                         <button
                             className="quick-connect-copy-button"
                             onClick={handleCopyAddress}
@@ -39,36 +37,22 @@ function ServerStatusCard({ server, connectionAddress }) {
                         >
                             {copyButtonText}
                         </button>
-                    </div>
-                )}
-
-                <div className="status-grid">
-                    <div className="status-item">
-                        <span className="status-label">Players</span>
-                        <span className="status-value">
-                            {server.players?.online || 0} / {server.players?.max || 0}
-                        </span>
-                    </div>
-
-                    <div className="status-item">
-                        <span className="status-label">Version</span>
-                        <span className="status-value">{server.version?.name || 'Unknown'}</span>
-                    </div>
-
-                    <div className="status-item">
-                        <span className="status-label">Protocol</span>
-                        <span className="status-value">{server.version?.protocol || 'Unknown'}</span>
-                    </div>
-
-                    {server.latency && (
-                        <div className="status-item">
-                            <span className="status-label">Latency</span>
-                            <span className="status-value">{server.latency}ms</span>
-                        </div>
-                    )}
-                </div>
-
-                {server.players && (
+                    }
+                >
+                    {connectionAddress}
+                </InfoCard>
+                <InfoCard title="Players">
+                    {server.players?.online || 0} / {server.players?.max || 0}
+                </InfoCard>
+                <InfoCard title="Version">
+                    {server.version?.name || 'Unknown'}
+                </InfoCard>
+                <InfoCard title="Latency">
+                    {server.latency}ms
+                </InfoCard>
+            </div>
+            {
+                server.players && (
                     <div className="player-bar">
                         <div className="player-bar-label">
                             <span>Player Capacity</span>
@@ -81,9 +65,9 @@ function ServerStatusCard({ server, connectionAddress }) {
                             />
                         </div>
                     </div>
-                )}
-            </div>
-        </div>
+                )
+            }
+        </Card >
     )
 }
 

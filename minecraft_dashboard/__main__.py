@@ -15,8 +15,8 @@ from minecraft_dashboard.config import Config
 from minecraft_dashboard.utils import LoggingUtils, OpenApiUtils
 from minecraft_dashboard.watcher import ConfigurationWatcher
 
-api_instance = None
-configuration_watcher = None
+api_instance: DashboardApi
+configuration_watcher: ConfigurationWatcher
 
 
 @asynccontextmanager
@@ -60,7 +60,7 @@ def main():
     config = Config.load()
 
     LoggingUtils.init(
-        config.log_path,
+        Path(config.log_path) if config.log_path else None,
         config.log_level,
         config.log_format_file,
         config.log_format_console,

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Callable, TypeVar, cast
 
 import colorlog
+import httpx
 from dataclass_wizard import json_field
 from dotenv import load_dotenv
 from mcstatus import JavaServer
@@ -15,6 +16,16 @@ from mcstatus import JavaServer
 from minecraft_dashboard.models import (
     ForgeInfo,
     ForgeModInfo,
+    McSrvStatusData,
+    McSrvStatusDebugData,
+    McSrvStatusInfoData,
+    McSrvStatusMapData,
+    McSrvStatusModData,
+    McSrvStatusMotdData,
+    McSrvStatusPlayerData,
+    McSrvStatusPlayersData,
+    McSrvStatusPluginData,
+    McSrvStatusProtocolData,
     PlayerSample,
     PlayersInfo,
     StatusData,
@@ -121,7 +132,7 @@ class LoggingUtils:
 
     @staticmethod
     def init(
-        log_path: Path,
+        log_path: Path | None,
         log_level: str,
         log_format_file: str,
         log_format_console: str,
@@ -129,8 +140,6 @@ class LoggingUtils:
         log_file_mode: str,
     ) -> None:
         """Initialize logging configuration."""
-
-        log_path.parent.mkdir(parents=True, exist_ok=True)
 
         color_formatter = colorlog.ColoredFormatter(
             fmt=log_format_console,
@@ -147,13 +156,23 @@ class LoggingUtils:
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(color_formatter)
 
-        file_handler = logging.FileHandler(log_path, mode=log_file_mode)
-        file_formatter = logging.Formatter(fmt=log_format_file, datefmt=log_date_format)
-        file_handler.setFormatter(file_formatter)
+        handlers = [console_handler]
+
+        if log_path and not log_path.is_dir():
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                file_handler = logging.FileHandler(log_path, mode=log_file_mode)
+                file_formatter = logging.Formatter(
+                    fmt=log_format_file, datefmt=log_date_format
+                )
+                file_handler.setFormatter(file_formatter)
+                handlers.insert(0, file_handler)
+            except PermissionError:
+                pass
 
         logging.basicConfig(
             level=log_level.upper(),
-            handlers=[file_handler, console_handler],
+            handlers=handlers,
         )
 
 
@@ -239,6 +258,108 @@ class MinecraftUtils:
             icon_base64=status.icon,
             forge_data=forge_info,
         )
+
+    @staticmethod
+    async def get_mcsrvstatus(
+        server_address: str, is_bedrock: bool = False, timeout: int = 10
+    ) -> McSrvStatusData:
+        """Get the status from mcsrvstat API."""
+        base_url = "https://api.mcsrvstat.us"
+        version = "3"
+
+        if is_bedrock:
+            url = f"{base_url}/bedrock/{version}/{server_address}"
+        else:
+            url = f"{base_url}/{version}/{server_address}"
+
+        headers = {"User-Agent": "minecraft-dashboard"}
+
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            try:
+                response = await client.get(url, headers=headers)
+                response.raise_for_status()
+
+                data = response.json()
+
+                debug_data = McSrvStatusDebugData(**data["debug"])
+
+                protocol_data = None
+                if "protocol" in data and data["protocol"]:
+                    protocol_data = McSrvStatusProtocolData(**data["protocol"])
+
+                motd_data = None
+                if "motd" in data and data["motd"]:
+                    motd_data = McSrvStatusMotdData(**data["motd"])
+
+                map_data = None
+                if "map" in data and data["map"]:
+                    map_data = McSrvStatusMapData(**data["map"])
+
+                players_data = None
+                if "players" in data and data["players"]:
+                    players_dict = data["players"]
+                    player_list = None
+                    if "list" in players_dict and players_dict["list"]:
+                        player_list = [
+                            McSrvStatusPlayerData(**player)
+                            for player in players_dict["list"]
+                        ]
+                    players_data = McSrvStatusPlayersData(
+                        online=players_dict["online"],
+                        max=players_dict["max"],
+                        player_list=player_list,
+                    )
+
+                plugins_data = None
+                if "plugins" in data and data["plugins"]:
+                    plugins_data = [
+                        McSrvStatusPluginData(**plugin) for plugin in data["plugins"]
+                    ]
+
+                mods_data = None
+                if "mods" in data and data["mods"]:
+                    mods_data = [McSrvStatusModData(**mod) for mod in data["mods"]]
+
+                info_data = None
+                if "info" in data and data["info"]:
+                    info_data = McSrvStatusInfoData(**data["info"])
+
+                return McSrvStatusData(
+                    online=data["online"],
+                    ip=data.get("ip"),
+                    port=data.get("port"),
+                    hostname=data.get("hostname"),
+                    debug=debug_data,
+                    version=data.get("version"),
+                    protocol=protocol_data,
+                    icon=data.get("icon"),
+                    software=data.get("software"),
+                    map=map_data,
+                    gamemode=data.get("gamemode"),
+                    serverid=data.get("serverid"),
+                    eula_blocked=data.get("eula_blocked"),
+                    motd=motd_data,
+                    players=players_data,
+                    plugins=plugins_data,
+                    mods=mods_data,
+                    info=info_data,
+                )
+
+            except httpx.HTTPStatusError as exception:
+                logger.error(
+                    f"HTTP error occurred while fetching mcsrvstat data: {exception}"
+                )
+                raise
+            except httpx.RequestError as exception:
+                logger.error(
+                    f"Request error occurred while fetching mcsrvstat data: {exception}"
+                )
+                raise
+            except Exception as exception:
+                logger.error(
+                    f"Unexpected error occurred while fetching mcsrvstat data: {exception}"
+                )
+                raise
 
 
 class OpenApiUtils:

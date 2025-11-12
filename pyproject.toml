@@ -8,6 +8,7 @@ dependencies = [
     "colorlog>=6.10.1",
     "dataclass-wizard>=0.35.1",
     "fastapi>=0.121.1",
+    "httpx>=0.28.1",
     "mcstatus>=12.0.6",
     "python-dotenv>=1.2.1",
     "pyyaml>=6.0.3",

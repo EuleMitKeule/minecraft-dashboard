@@ -1,11 +1,18 @@
 """API module for minecraft-dashboard."""
 
+import httpx
 from classy_fastapi import get
 from classy_fastapi.routable import Routable
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 
 from minecraft_dashboard.config import Config
-from minecraft_dashboard.models import ConfigData, HealthCheckData, StatusData
+from minecraft_dashboard.models import (
+    ConfigData,
+    HealthCheckData,
+    McSrvStatusData,
+    StatusData,
+)
 from minecraft_dashboard.utils import MinecraftUtils
 
 router = APIRouter()
@@ -70,3 +77,36 @@ class DashboardApi(Routable):
             self.config.minecraft_server_port,
             self.config.minecraft_server_timeout,
         )
+
+    @get(
+        "/status-mcsrvstatus",
+        summary="Get the status from McSrvStat API",
+        tags=["Status"],
+        status_code=200,
+        response_model=McSrvStatusData,
+    )
+    async def get_status_mcsrvstatus(self):
+        """Get the status from McSrvStat API."""
+        external_host = self.config.effective_minecraft_server_host_external
+        external_port = self.config.effective_minecraft_server_port_external
+        server_address = f"{external_host}:{external_port}"
+
+        try:
+            return await MinecraftUtils.get_mcsrvstatus(
+                server_address, is_bedrock=False, timeout=10
+            )
+        except httpx.ReadTimeout:
+            return JSONResponse(
+                status_code=504,
+                content={"error": "Timeout while contacting mcsrvstat.us API"},
+            )
+        except httpx.RequestError as exc:
+            return JSONResponse(
+                status_code=504,
+                content={"error": f"Request error: {str(exc)}"},
+            )
+        except Exception as exc:
+            return JSONResponse(
+                status_code=500,
+                content={"error": f"Unexpected error: {str(exc)}"},
+            )

@@ -21,7 +21,7 @@ class ConfigurationWatcher:
         self.configuration_file_path = configuration.config_file_path
         self.last_modified_time = self._get_modification_time()
         self.is_running = False
-        self.watch_task = None
+        self.watch_task: asyncio.Task | None = None
 
     def _get_modification_time(self) -> float:
         """Get the last modification time of the configuration file."""

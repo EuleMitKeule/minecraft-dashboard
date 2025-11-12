@@ -54,6 +54,7 @@ const mockConfigData = {
 
 function App() {
   const [serverData, setServerData] = useState(null)
+  const [mcsrvStatusData, setMcsrvStatusData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [pollingInterval, setPollingInterval] = useState(5000)
@@ -135,6 +136,33 @@ function App() {
     const statusIntervalId = setInterval(fetchStatus, pollingInterval)
 
     return () => clearInterval(statusIntervalId)
+  }, [useMockData, simulateOffline, pollingInterval, configLoaded])
+
+  useEffect(() => {
+    if (!configLoaded) return
+
+    const fetchMcsrvStatus = async () => {
+      try {
+        if (!useMockData && !simulateOffline) {
+          const mcsrvStatusResponse = await client.GET('/status-mcsrvstatus')
+
+          if (mcsrvStatusResponse.error) {
+            console.error('Failed to fetch mcsrvstat data:', mcsrvStatusResponse.error)
+            return
+          }
+
+          setMcsrvStatusData(mcsrvStatusResponse.data)
+        }
+      } catch (err) {
+        console.error('Error fetching mcsrvstat data:', err)
+      }
+    }
+
+    fetchMcsrvStatus()
+
+    const mcsrvStatusIntervalId = setInterval(fetchMcsrvStatus, pollingInterval)
+
+    return () => clearInterval(mcsrvStatusIntervalId)
   }, [useMockData, simulateOffline, pollingInterval, configLoaded])
 
   useEffect(() => {

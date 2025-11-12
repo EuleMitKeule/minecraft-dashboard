@@ -87,11 +87,10 @@ class Config(YAMLWizard, JSONWizard):
         DEFAULT_HOST,
     )
     api_port: int = DataclassUtils.field(CONF_PORT, ENV_PORT, DEFAULT_PORT)
-    log_path: Path = DataclassUtils.field(
+    log_path: str | None = DataclassUtils.field(
         CONF_LOG_PATH,
         ENV_LOG_PATH,
         DEFAULT_LOG_PATH,
-        Path,
     )
     log_level: str = DataclassUtils.field(
         CONF_LOG_LEVEL,

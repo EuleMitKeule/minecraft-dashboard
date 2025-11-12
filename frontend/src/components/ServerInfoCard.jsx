@@ -1,68 +1,48 @@
+import Card from './Card'
+import InfoCard from './InfoCard'
 import './ServerInfoCard.css'
 
 function ServerInfoCard({ server }) {
     const forgeModsCount = server.forge_data?.mods?.length || 0
 
     return (
-        <div className="card">
-            <div className="card-header">
-                <h2 className="card-title">Server Information</h2>
+        <Card title="Server Information">
+            <div className="card-grid">
+                <InfoCard title="Version">{server.version?.name || 'Unknown'}</InfoCard>
+                <InfoCard title="Protocol">{server.version?.protocol || 'Unknown'}</InfoCard>
+                {server.enforces_secure_chat !== null && (
+                    <InfoCard title="Secure Chat">
+                        {server.enforces_secure_chat ? 'Enabled' : 'Disabled'}
+                    </InfoCard>
+                )}
             </div>
 
-            <div className="card-content">
-                <div className="info-section">
-                    <h3 className="section-title">General</h3>
-                    <div className="info-list">
-                        <div className="info-item">
-                            <span className="info-label">Version</span>
-                            <span className="info-value">{server.version?.name || 'Unknown'}</span>
+            {/* <InfoCard title={`Forge Mods (${forgeModsCount})`}>
+                <div className="plugin-grid">
+                    {server.forge_data?.mods?.slice(0, 8).map((mod, index) => (
+                        <div key={index} className="plugin-tag">
+                            <span className="plugin-icon">🔌</span>
+                            {mod.name}
                         </div>
-                        <div className="info-item">
-                            <span className="info-label">Protocol</span>
-                            <span className="info-value">{server.version?.protocol || 'Unknown'}</span>
+                    ))}
+                    {forgeModsCount > 8 && (
+                        <div className="plugin-tag">
+                            <span className="plugin-icon">➕</span>
+                            {forgeModsCount - 8} more
                         </div>
-                        {server.enforces_secure_chat !== null && (
-                            <div className="info-item">
-                                <span className="info-label">Secure Chat</span>
-                                <span className="info-value">
-                                    {server.enforces_secure_chat ? '✓ Enabled' : '✗ Disabled'}
-                                </span>
-                            </div>
-                        )}
-                    </div>
+                    )}
                 </div>
+            </InfoCard> */}
 
-                {forgeModsCount > 0 && (
-                    <div className="info-section">
-                        <h3 className="section-title">Forge Mods ({forgeModsCount})</h3>
-                        <div className="plugin-grid">
-                            {server.forge_data.mods.slice(0, 8).map((mod, index) => (
-                                <div key={index} className="plugin-tag">
-                                    <span className="plugin-icon">🔌</span>
-                                    {mod.name}
-                                </div>
-                            ))}
-                            {forgeModsCount > 8 && (
-                                <div className="plugin-tag">
-                                    <span className="plugin-icon">➕</span>
-                                    {forgeModsCount - 8} more
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {server.motd_html && (
-                    <div className="info-section">
-                        <h3 className="section-title">Message of the Day</h3>
-                        <div
-                            className="motd-content"
-                            dangerouslySetInnerHTML={{ __html: server.motd_html }}
-                        />
-                    </div>
-                )}
-            </div>
-        </div>
+            {server.motd_html && (
+                <InfoCard title="Motd">
+                    <div
+                        className="motd-content"
+                        dangerouslySetInnerHTML={{ __html: server.motd_html }}
+                    />
+                </InfoCard>
+            )}
+        </Card>
     )
 }
 
