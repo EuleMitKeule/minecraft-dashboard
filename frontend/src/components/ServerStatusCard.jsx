@@ -60,18 +60,20 @@ function ServerStatusCard({ server, connectionAddress, mcsrvStatus, ismcServer }
             </div>
             {
                 server.players && (
-                    <div className="player-bar">
-                        <div className="player-bar-label">
-                            <span>Player Capacity</span>
-                            <span>{Math.round((server.players.online / server.players.max) * 100)}%</span>
+                    <InfoCard title="Player Capacity">
+                        <div className="player-bar">
+                            <div className="player-bar-label">
+                                <span>{server.players.online}/{server.players.max}</span>
+                                <span>{Math.round((server.players.online / server.players.max) * 100)}%</span>
+                            </div>
+                            <div className="player-bar-track">
+                                <div
+                                    className="player-bar-fill"
+                                    style={{ width: `${(server.players.online / server.players.max) * 100}%` }}
+                                />
+                            </div>
                         </div>
-                        <div className="player-bar-track">
-                            <div
-                                className="player-bar-fill"
-                                style={{ width: `${(server.players.online / server.players.max) * 100}%` }}
-                            />
-                        </div>
-                    </div>
+                    </InfoCard>
                 )
             }
         </Card >
