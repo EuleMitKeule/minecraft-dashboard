@@ -105,15 +105,3 @@
 .empty-state p {
     font-size: 1rem;
 }
-
-.card {
-    background: rgba(30, 30, 46, 0.7);
-    border-radius: 12px;
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    padding: 1.5rem;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
-    max-width: 480px;
-    width: 100%;
-}
