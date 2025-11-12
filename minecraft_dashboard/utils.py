@@ -16,12 +16,6 @@ from mcstatus import JavaServer
 from minecraft_dashboard.models import (
     ForgeInfo,
     ForgeModInfo,
-    IsMcServerData,
-    IsMcServerDebugData,
-    IsMcServerMotdData,
-    IsMcServerPlayerData,
-    IsMcServerPlayersData,
-    IsMcServerVersionData,
     McSrvStatusData,
     McSrvStatusDebugData,
     McSrvStatusInfoData,
@@ -380,80 +374,6 @@ class MinecraftUtils:
             except Exception as exception:
                 logger.error(
                     f"Unexpected error occurred while fetching mcsrvstat data: {exception}"
-                )
-                raise
-
-    @staticmethod
-    async def get_ismcserver_status(
-        server_address: str, api_token: str, timeout: int = 10
-    ) -> IsMcServerData:
-        """Get the status from IsMcServer API."""
-        base_url = "https://api.ismcserver.online"
-        url = f"{base_url}/{server_address}"
-
-        headers = {"Authorization": api_token, "User-Agent": "minecraft-dashboard"}
-
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            try:
-                response = await client.get(url, headers=headers)
-                response.raise_for_status()
-
-                data = response.json()
-
-                version_data = None
-                if "version" in data and data["version"]:
-                    version_data = IsMcServerVersionData(**data["version"])
-
-                players_data = None
-                if "players" in data and data["players"]:
-                    players_dict = data["players"]
-                    player_list = None
-                    if "list" in players_dict and players_dict["list"]:
-                        player_list = [
-                            IsMcServerPlayerData(**player)
-                            for player in players_dict["list"]
-                        ]
-                    players_data = IsMcServerPlayersData(
-                        online=players_dict["online"],
-                        max=players_dict["max"],
-                        player_list=player_list,
-                    )
-
-                motd_data = None
-                if "motd" in data and data["motd"]:
-                    motd_data = IsMcServerMotdData(**data["motd"])
-
-                debug_data = None
-                if "debug" in data and data["debug"]:
-                    debug_data = IsMcServerDebugData(**data["debug"])
-
-                return IsMcServerData(
-                    online=data["online"],
-                    host=data["host"],
-                    port=data["port"],
-                    version=version_data,
-                    players=players_data,
-                    protocol=data.get("protocol"),
-                    software=data.get("software"),
-                    motd=motd_data,
-                    favicon=data.get("favicon"),
-                    ping=data.get("ping"),
-                    debug=debug_data,
-                )
-
-            except httpx.HTTPStatusError as exception:
-                logger.error(
-                    f"HTTP error occurred while fetching IsMcServer data: {exception}"
-                )
-                raise
-            except httpx.RequestError as exception:
-                logger.error(
-                    f"Request error occurred while fetching IsMcServer data: {exception}"
-                )
-                raise
-            except Exception as exception:
-                logger.error(
-                    f"Unexpected error occurred while fetching IsMcServer data: {exception}"
                 )
                 raise
 

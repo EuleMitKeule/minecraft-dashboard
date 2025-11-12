@@ -3,7 +3,7 @@ import Card from './Card'
 import InfoCard from './InfoCard'
 import './ServerStatusCard.css'
 
-function ServerStatusCard({ server, connectionAddress, mcsrvStatus, ismcServer }) {
+function ServerStatusCard({ server, connectionAddress, mcsrvStatus, useExternalLatency }) {
     const [copyButtonText, setCopyButtonText] = useState('📋')
 
     const handleCopyAddress = async () => {
@@ -22,6 +22,8 @@ function ServerStatusCard({ server, connectionAddress, mcsrvStatus, ismcServer }
         text: server.online ? '🟢 Online' : '🔴 Offline',
         variant: server.online ? 'online' : 'offline'
     }
+
+    const latency = useExternalLatency ? server.latency : server.latency
 
     return (
         <Card title="Server Status" badge={statusBadge}>
@@ -47,13 +49,8 @@ function ServerStatusCard({ server, connectionAddress, mcsrvStatus, ismcServer }
                     </InfoCard>
                 )}
                 <InfoCard title="Latency">
-                    {server.latency}ms
+                    {latency !== null && latency !== undefined ? `${latency}ms` : 'N/A'}
                 </InfoCard>
-                {ismcServer?.ping !== undefined && (
-                    <InfoCard title="Latency (External)">
-                        {ismcServer.ping}ms
-                    </InfoCard>
-                )}
             </div>
             {
                 server.players && (

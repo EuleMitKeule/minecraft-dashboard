@@ -117,42 +117,9 @@ const mockMcsrvStatusData = {
   }
 }
 
-const mockIsmcServerData = {
-  online: true,
-  host: '127.0.0.1',
-  port: 25565,
-  version: {
-    array: ['Paper 1.21.1'],
-    string: 'Paper 1.21.1'
-  },
-  players: {
-    online: 5,
-    max: 20,
-    player_list: [
-      { name: 'MockPlayer1', uuid: '12345678-1234-1234-1234-123456789abc' },
-      { name: 'MockPlayer2', uuid: '87654321-4321-4321-4321-cba987654321' }
-    ]
-  },
-  protocol: 767,
-  software: 'Paper',
-  motd: {
-    raw: 'Welcome to Mock Server!\nHave fun playing!',
-    clean: 'Welcome to Mock Server! Have fun playing!',
-    html: '<span>Welcome to Mock Server!</span><br><span>Have fun playing!</span>'
-  },
-  favicon: null,
-  ping: 45,
-  debug: {
-    status: true,
-    query: true,
-    legacy: false
-  }
-}
-
 function App() {
   const [serverData, setServerData] = useState(null)
   const [mcsrvStatusData, setMcsrvStatusData] = useState(null)
-  const [ismcServerData, setIsmcServerData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [pollingInterval, setPollingInterval] = useState(5000)
@@ -163,6 +130,7 @@ function App() {
   const [headerTitle, setHeaderTitle] = useState('Minecraft Server Dashboard')
   const [serverAddress, setServerAddress] = useState('')
   const [frontendLinks, setFrontendLinks] = useState([])
+  const [useExternalLatency, setUseExternalLatency] = useState(true)
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -271,37 +239,6 @@ function App() {
   }, [useMockData, simulateOffline, pollingInterval, configLoaded])
 
   useEffect(() => {
-    if (!configLoaded) return
-
-    const fetchIsmcServerStatus = async () => {
-      try {
-        if (simulateOffline) {
-          setIsmcServerData(null)
-        } else if (useMockData) {
-          setIsmcServerData(mockIsmcServerData)
-        } else {
-          const ismcServerResponse = await client.GET('/status-ismcserver')
-
-          if (ismcServerResponse.error) {
-            console.error('Failed to fetch IsMcServer data:', ismcServerResponse.error)
-            return
-          }
-
-          setIsmcServerData(ismcServerResponse.data)
-        }
-      } catch (err) {
-        console.error('Error fetching IsMcServer data:', err)
-      }
-    }
-
-    fetchIsmcServerStatus()
-
-    const ismcServerIntervalId = setInterval(fetchIsmcServerStatus, pollingInterval)
-
-    return () => clearInterval(ismcServerIntervalId)
-  }, [useMockData, simulateOffline, pollingInterval, configLoaded])
-
-  useEffect(() => {
     document.title = pageTitle
   }, [pageTitle])
 
@@ -330,13 +267,30 @@ function App() {
     <div className="app">
       <header className="header">
         <div className="container">
-          <h1 className="title">
-            <span className="title-icon">⛏️</span>
-            {headerTitle}
-          </h1>
-          <p className="subtitle">
-            {serverAddress} • {serverData.version?.name || 'Unknown Version'}
-          </p>
+          <div className="header-content">
+            <div className="header-text">
+              <h1 className="title">
+                <span className="title-icon">⛏️</span>
+                {headerTitle}
+              </h1>
+              <p className="subtitle">
+                {serverAddress} • {serverData.version?.name || 'Unknown Version'}
+              </p>
+            </div>
+            <div className="header-toggle">
+              <span className="header-toggle-label">
+                {useExternalLatency ? 'External' : 'Internal'}
+              </span>
+              <label className="header-toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={useExternalLatency}
+                  onChange={() => setUseExternalLatency(!useExternalLatency)}
+                />
+                <span className="slider"></span>
+              </label>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -344,8 +298,13 @@ function App() {
         <div className="container">
           <div className="grid">
             <LinksBar links={frontendLinks} />
-            <ServerStatusCard server={serverData} connectionAddress={serverAddress} mcsrvStatus={mcsrvStatusData} ismcServer={ismcServerData} />
-            <ServerInfoCard server={serverData} mcsrvStatus={mcsrvStatusData} ismcServer={ismcServerData} />
+            <ServerStatusCard
+              server={serverData}
+              connectionAddress={serverAddress}
+              mcsrvStatus={mcsrvStatusData}
+              useExternalLatency={useExternalLatency}
+            />
+            <ServerInfoCard server={serverData} mcsrvStatus={mcsrvStatusData} />
             <PlayerListCard players={serverData.players} />
           </div>
         </div>

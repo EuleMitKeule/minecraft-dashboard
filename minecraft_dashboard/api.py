@@ -10,7 +10,6 @@ from minecraft_dashboard.config import Config
 from minecraft_dashboard.models import (
     ConfigData,
     HealthCheckData,
-    IsMcServerData,
     McSrvStatusData,
     StatusData,
 )
@@ -101,45 +100,6 @@ class DashboardApi(Routable):
             return JSONResponse(
                 status_code=504,
                 content={"error": "Timeout while contacting mcsrvstat.us API"},
-            )
-        except httpx.RequestError as exc:
-            return JSONResponse(
-                status_code=504,
-                content={"error": f"Request error: {str(exc)}"},
-            )
-        except Exception as exc:
-            return JSONResponse(
-                status_code=500,
-                content={"error": f"Unexpected error: {str(exc)}"},
-            )
-
-    @get(
-        "/status-ismcserver",
-        summary="Get the status from IsMcServer API",
-        tags=["Status"],
-        status_code=200,
-        response_model=IsMcServerData,
-    )
-    async def get_status_ismcserver(self):
-        """Get the status from IsMcServer API."""
-        if not self.config.ismcserver_api_token:
-            return JSONResponse(
-                status_code=500,
-                content={"error": "IsMcServer API token not configured"},
-            )
-
-        external_host = self.config.effective_minecraft_server_host_external
-        external_port = self.config.effective_minecraft_server_port_external
-        server_address = f"{external_host}:{external_port}"
-
-        try:
-            return await MinecraftUtils.get_ismcserver_status(
-                server_address, self.config.ismcserver_api_token, timeout=10
-            )
-        except httpx.ReadTimeout:
-            return JSONResponse(
-                status_code=504,
-                content={"error": "Timeout while contacting IsMcServer API"},
             )
         except httpx.RequestError as exc:
             return JSONResponse(

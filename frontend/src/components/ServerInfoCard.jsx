@@ -2,7 +2,7 @@ import Card from './Card'
 import InfoCard from './InfoCard'
 import './ServerInfoCard.css'
 
-function ServerInfoCard({ server, mcsrvStatus, ismcServer }) {
+function ServerInfoCard({ server, mcsrvStatus }) {
     const forgeModsCount = server.forge_data?.mods?.length || 0
 
     return (

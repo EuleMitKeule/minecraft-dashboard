@@ -1,11 +1,12 @@
 import PropTypes from 'prop-types'
 import './Card.css'
 
-function Card({ title, badge, badgeElement, children, className = '' }) {
+function Card({ title, badge, badgeElement, toggleElement, children, className = '' }) {
     return (
         <div className={`card ${className}`}>
             <div className="card-header">
                 <h2 className="card-title">{title}</h2>
+                {toggleElement && toggleElement}
                 {badge && <span className={`card-badge ${badge.variant}`}>{badge.text}</span>}
                 {badgeElement && badgeElement}
             </div>
@@ -24,6 +25,7 @@ Card.propTypes = {
         variant: PropTypes.oneOf(['online', 'offline']).isRequired,
     }),
     badgeElement: PropTypes.node,
+    toggleElement: PropTypes.node,
     children: PropTypes.node.isRequired,
     className: PropTypes.string,
 }
