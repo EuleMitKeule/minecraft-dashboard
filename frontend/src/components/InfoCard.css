@@ -39,6 +39,9 @@
     white-space: nowrap;
     scrollbar-width: thin;
     scrollbar-color: rgba(139, 92, 246, 0.5) rgba(0, 0, 0, 0.2);
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
 }
 
 .info-card-body::-webkit-scrollbar {

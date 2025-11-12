@@ -62,6 +62,7 @@ class DashboardApi(Routable):
             page_title=self.config.frontend_page_title,
             header_title=self.config.frontend_header_title,
             server_address=server_address,
+            frontend_links=self.config.frontend_links,
         )
 
     @get(

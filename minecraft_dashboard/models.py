@@ -1,6 +1,8 @@
 """Models module for minecraft-dashboard."""
 
+from dataclass_wizard import JSONWizard, YAMLWizard
 from pydantic import BaseModel
+from pydantic.dataclasses import dataclass
 
 
 class HealthCheckData(BaseModel):
@@ -109,6 +111,15 @@ class McSrvStatusData(BaseModel):
     info: McSrvStatusInfoData | None = None
 
 
+@dataclass
+class FrontendLink(YAMLWizard, JSONWizard):
+    """Frontend link data model."""
+
+    title: str
+    url: str
+    icon: str | None = None
+
+
 class ConfigData(BaseModel):
     """Configuration data model."""
 
@@ -118,6 +129,7 @@ class ConfigData(BaseModel):
     page_title: str
     header_title: str
     server_address: str
+    frontend_links: list[FrontendLink] = []
 
 
 class PlayerSample(BaseModel):

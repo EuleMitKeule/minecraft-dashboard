@@ -12,6 +12,7 @@ from pydantic.dataclasses import dataclass
 from minecraft_dashboard.const import (
     CONF_CONFIG_FILE_PATH,
     CONF_FRONTEND_HEADER_TITLE,
+    CONF_FRONTEND_LINKS,
     CONF_FRONTEND_PAGE_TITLE,
     CONF_FRONTEND_POLLING_INTERVAL,
     CONF_FRONTEND_SIMULATE_OFFLINE,
@@ -32,6 +33,7 @@ from minecraft_dashboard.const import (
     CONF_PORT,
     DEFAULT_CONFIG_FILE_PATH,
     DEFAULT_FRONTEND_HEADER_TITLE,
+    DEFAULT_FRONTEND_LINKS,
     DEFAULT_FRONTEND_PAGE_TITLE,
     DEFAULT_FRONTEND_POLLING_INTERVAL,
     DEFAULT_FRONTEND_SIMULATE_OFFLINE,
@@ -52,6 +54,7 @@ from minecraft_dashboard.const import (
     DEFAULT_PORT,
     ENV_CONFIG_FILE_PATH,
     ENV_FRONTEND_HEADER_TITLE,
+    ENV_FRONTEND_LINKS,
     ENV_FRONTEND_PAGE_TITLE,
     ENV_FRONTEND_POLLING_INTERVAL,
     ENV_FRONTEND_SIMULATE_OFFLINE,
@@ -71,6 +74,7 @@ from minecraft_dashboard.const import (
     ENV_MINECRAFT_SERVER_TIMEOUT,
     ENV_PORT,
 )
+from minecraft_dashboard.models import FrontendLink
 from minecraft_dashboard.utils import DataclassUtils
 
 
@@ -170,6 +174,11 @@ class Config(YAMLWizard, JSONWizard):
         ENV_FRONTEND_HEADER_TITLE,
         DEFAULT_FRONTEND_HEADER_TITLE,
     )
+    frontend_links: list[FrontendLink] = DataclassUtils.field(
+        CONF_FRONTEND_LINKS,
+        ENV_FRONTEND_LINKS,
+        DEFAULT_FRONTEND_LINKS,
+    )
     ismcserver_api_token: str | None = DataclassUtils.field(
         CONF_ISMCSERVER_API_TOKEN,
         ENV_ISMCSERVER_API_TOKEN,
@@ -191,7 +200,7 @@ class Config(YAMLWizard, JSONWizard):
 
         self.config_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with self.config_file_path.open("w") as config_file:
+        with self.config_file_path.open("w", encoding="utf-8") as config_file:
             config_file.write(self.to_yaml())
 
     @classmethod
@@ -210,7 +219,7 @@ class Config(YAMLWizard, JSONWizard):
         if not config.config_file_path.exists():
             return cls.init()
 
-        with config.config_file_path.open("r") as config_file:
+        with config.config_file_path.open("r", encoding="utf-8") as config_file:
             config_dict: dict[str, Any] = yaml.safe_load(config_file)
 
         config = cls.from_dict(config_dict)

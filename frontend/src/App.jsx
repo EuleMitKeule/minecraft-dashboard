@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { client } from './api/client'
 import './App.css'
+import LinksBar from './components/LinksBar'
 import PlayerListCard from './components/PlayerListCard'
 import ServerInfoCard from './components/ServerInfoCard'
 import ServerStatusCard from './components/ServerStatusCard'
@@ -49,7 +50,103 @@ const mockServerOfflineData = {
 const mockConfigData = {
   page_title: 'Mock Minecraft Server',
   header_title: 'Mock Server Dashboard',
-  server_address: 'some.mock.server.example:25565'
+  server_address: 'some.mock.server.example:25565',
+  frontend_links: [
+    { title: 'Mock Map', url: 'https://map.example.com', icon: '🗺️' },
+    { title: 'Mock Wiki', url: 'https://wiki.example.com', icon: '📖' },
+    { title: 'Mock Discord', url: 'https://discord.gg/mock', icon: '💬' }
+  ]
+}
+
+const mockMcsrvStatusData = {
+  online: true,
+  ip: '127.0.0.1',
+  port: 25565,
+  hostname: 'mock-server.example',
+  debug: {
+    ping: true,
+    query: true,
+    bedrock: false,
+    srv: true,
+    querymismatch: false,
+    ipinsrv: false,
+    cnameinsrv: false,
+    animatedmotd: false,
+    cachehit: false,
+    cachetime: 1234567890,
+    cacheexpire: 1234567990,
+    apiversion: 2
+  },
+  version: 'Paper 1.21.1',
+  protocol: {
+    version: 767,
+    name: '1.21.1'
+  },
+  icon: null,
+  software: 'Paper',
+  map: {
+    raw: 'world',
+    clean: 'world',
+    html: '<span>world</span>'
+  },
+  gamemode: 'Survival',
+  serverid: 'mock-server-id',
+  eula_blocked: false,
+  motd: {
+    raw: ['Welcome to Mock Server!', 'Have fun playing!'],
+    clean: ['Welcome to Mock Server!', 'Have fun playing!'],
+    html: ['<span>Welcome to Mock Server!</span>', '<span>Have fun playing!</span>']
+  },
+  players: {
+    online: 5,
+    max: 20,
+    list: [
+      { name: 'MockPlayer1', uuid: '12345678-1234-1234-1234-123456789abc' },
+      { name: 'MockPlayer2', uuid: '87654321-4321-4321-4321-cba987654321' }
+    ]
+  },
+  plugins: [
+    { name: 'Essentials', version: '2.20.1' },
+    { name: 'WorldEdit', version: '7.2.18' }
+  ],
+  mods: [],
+  info: {
+    raw: ['Mock server info'],
+    clean: ['Mock server info'],
+    html: ['<span>Mock server info</span>']
+  }
+}
+
+const mockIsmcServerData = {
+  online: true,
+  host: '127.0.0.1',
+  port: 25565,
+  version: {
+    array: ['Paper 1.21.1'],
+    string: 'Paper 1.21.1'
+  },
+  players: {
+    online: 5,
+    max: 20,
+    player_list: [
+      { name: 'MockPlayer1', uuid: '12345678-1234-1234-1234-123456789abc' },
+      { name: 'MockPlayer2', uuid: '87654321-4321-4321-4321-cba987654321' }
+    ]
+  },
+  protocol: 767,
+  software: 'Paper',
+  motd: {
+    raw: 'Welcome to Mock Server!\nHave fun playing!',
+    clean: 'Welcome to Mock Server! Have fun playing!',
+    html: '<span>Welcome to Mock Server!</span><br><span>Have fun playing!</span>'
+  },
+  favicon: null,
+  ping: 45,
+  debug: {
+    status: true,
+    query: true,
+    legacy: false
+  }
 }
 
 function App() {
@@ -65,6 +162,7 @@ function App() {
   const [pageTitle, setPageTitle] = useState('Minecraft Server Dashboard')
   const [headerTitle, setHeaderTitle] = useState('Minecraft Server Dashboard')
   const [serverAddress, setServerAddress] = useState('')
+  const [frontendLinks, setFrontendLinks] = useState([])
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -83,10 +181,12 @@ function App() {
           setPageTitle(mockConfigData.page_title)
           setHeaderTitle(mockConfigData.header_title)
           setServerAddress(mockConfigData.server_address)
+          setFrontendLinks(mockConfigData.frontend_links)
         } else {
           setPageTitle(configResponse.data.page_title)
           setHeaderTitle(configResponse.data.header_title)
           setServerAddress(configResponse.data.server_address || '')
+          setFrontendLinks(configResponse.data.frontend_links || [])
         }
 
         setConfigLoaded(true)
@@ -144,7 +244,11 @@ function App() {
 
     const fetchMcsrvStatus = async () => {
       try {
-        if (!useMockData && !simulateOffline) {
+        if (simulateOffline) {
+          setMcsrvStatusData(null)
+        } else if (useMockData) {
+          setMcsrvStatusData(mockMcsrvStatusData)
+        } else {
           const mcsrvStatusResponse = await client.GET('/status-mcsrvstatus')
 
           if (mcsrvStatusResponse.error) {
@@ -171,7 +275,11 @@ function App() {
 
     const fetchIsmcServerStatus = async () => {
       try {
-        if (!useMockData && !simulateOffline) {
+        if (simulateOffline) {
+          setIsmcServerData(null)
+        } else if (useMockData) {
+          setIsmcServerData(mockIsmcServerData)
+        } else {
           const ismcServerResponse = await client.GET('/status-ismcserver')
 
           if (ismcServerResponse.error) {
@@ -235,6 +343,7 @@ function App() {
       <main className="main">
         <div className="container">
           <div className="grid">
+            <LinksBar links={frontendLinks} />
             <ServerStatusCard server={serverData} connectionAddress={serverAddress} mcsrvStatus={mcsrvStatusData} ismcServer={ismcServerData} />
             <ServerInfoCard server={serverData} mcsrvStatus={mcsrvStatusData} ismcServer={ismcServerData} />
             <PlayerListCard players={serverData.players} />

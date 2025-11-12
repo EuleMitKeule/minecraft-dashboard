@@ -35,7 +35,10 @@ function ServerInfoCard({ server, mcsrvStatus, ismcServer }) {
             </InfoCard> */}
 
             {server.motd_html && (
-                <InfoCard title="Motd">
+                <InfoCard
+                    title="Motd"
+                    className={`motd-card ${server.motd_html.includes('<br>') || server.motd_html.includes('\n') ? 'motd-multiline' : 'motd-singleline'}`}
+                >
                     <div
                         className="motd-content"
                         dangerouslySetInnerHTML={{ __html: server.motd_html }}

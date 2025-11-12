@@ -77,17 +77,33 @@ class DataclassUtils:
         is_helper: bool = False,
     ) -> Any:
         """Create a dataclass field."""
-        return json_field(
-            config_name,
-            dump=not is_helper,
-            init=not is_helper,
-            default=EnvUtils.read(env_name, default, parser),
-            metadata={
-                "config_name": config_name,
-                "env_name": env_name,
-                "parser": parser,
-            },
-        )
+        # Check if default is mutable (list, dict, set)
+        is_mutable = isinstance(default, (list, dict, set))
+
+        if is_mutable:
+            return json_field(
+                config_name,
+                dump=not is_helper,
+                init=not is_helper,
+                default_factory=lambda: EnvUtils.read(env_name, default, parser),
+                metadata={
+                    "config_name": config_name,
+                    "env_name": env_name,
+                    "parser": parser,
+                },
+            )
+        else:
+            return json_field(
+                config_name,
+                dump=not is_helper,
+                init=not is_helper,
+                default=EnvUtils.read(env_name, default, parser),
+                metadata={
+                    "config_name": config_name,
+                    "env_name": env_name,
+                    "parser": parser,
+                },
+            )
 
     @staticmethod
     def helper_field(

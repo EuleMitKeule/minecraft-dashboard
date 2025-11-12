@@ -29,3 +29,26 @@
 .motd-content {
     line-height: 1.2;
 }
+
+.motd-card .info-card-body {
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.motd-card .motd-content {
+    line-height: 1.2;
+    width: 100%;
+}
+
+.motd-multiline .motd-content {
+    font-size: 0.85rem;
+    line-height: 1.0;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.motd-singleline .motd-content {
+    font-size: 1.2rem;
+    white-space: nowrap;
+}

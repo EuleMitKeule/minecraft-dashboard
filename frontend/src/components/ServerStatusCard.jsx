@@ -46,9 +46,6 @@ function ServerStatusCard({ server, connectionAddress, mcsrvStatus, ismcServer }
                         {mcsrvStatus.ip}
                     </InfoCard>
                 )}
-                <InfoCard title="Version">
-                    {server.version?.name || 'Unknown'}
-                </InfoCard>
                 <InfoCard title="Latency">
                     {server.latency}ms
                 </InfoCard>

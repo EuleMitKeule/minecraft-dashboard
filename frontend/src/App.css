@@ -40,7 +40,7 @@
 
 .main {
     flex: 1;
-    padding: 3rem 0;
+    padding: 2rem 0;
 }
 
 .grid {
@@ -88,7 +88,6 @@
     background: rgba(0, 0, 0, 0.3);
     padding: 1.5rem 0;
     border-top: 2px solid rgba(139, 92, 246, 0.3);
-    margin-top: 3rem;
     text-align: center;
     color: #9ca3af;
     font-size: 0.9rem;
