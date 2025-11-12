@@ -171,3 +171,57 @@ class StatusData(BaseModel):
     has_icon: bool | None = None
     icon_base64: str | None = None
     forge_data: ForgeInfo | None = None
+
+
+class IsMcServerVersionData(BaseModel):
+    """IsMcServer API version data model."""
+
+    array: list[str]
+    string: str
+
+
+class IsMcServerPlayerData(BaseModel):
+    """IsMcServer API player data model."""
+
+    name: str
+    uuid: str | None = None
+
+
+class IsMcServerPlayersData(BaseModel):
+    """IsMcServer API players data model."""
+
+    online: int
+    max: int
+    player_list: list[IsMcServerPlayerData] | None = None
+
+
+class IsMcServerMotdData(BaseModel):
+    """IsMcServer API motd data model."""
+
+    raw: str
+    clean: str
+    html: str
+
+
+class IsMcServerDebugData(BaseModel):
+    """IsMcServer API debug data model."""
+
+    status: bool
+    query: bool
+    legacy: bool
+
+
+class IsMcServerData(BaseModel):
+    """IsMcServer API status data model."""
+
+    online: bool
+    host: str
+    port: int
+    version: IsMcServerVersionData | None = None
+    players: IsMcServerPlayersData | None = None
+    protocol: int | None = None
+    software: str | None = None
+    motd: IsMcServerMotdData | None = None
+    favicon: str | None = None
+    ping: int | None = None
+    debug: IsMcServerDebugData | None = None

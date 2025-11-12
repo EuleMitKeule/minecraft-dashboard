@@ -55,6 +55,7 @@ const mockConfigData = {
 function App() {
   const [serverData, setServerData] = useState(null)
   const [mcsrvStatusData, setMcsrvStatusData] = useState(null)
+  const [ismcServerData, setIsmcServerData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [pollingInterval, setPollingInterval] = useState(5000)
@@ -166,6 +167,33 @@ function App() {
   }, [useMockData, simulateOffline, pollingInterval, configLoaded])
 
   useEffect(() => {
+    if (!configLoaded) return
+
+    const fetchIsmcServerStatus = async () => {
+      try {
+        if (!useMockData && !simulateOffline) {
+          const ismcServerResponse = await client.GET('/status-ismcserver')
+
+          if (ismcServerResponse.error) {
+            console.error('Failed to fetch IsMcServer data:', ismcServerResponse.error)
+            return
+          }
+
+          setIsmcServerData(ismcServerResponse.data)
+        }
+      } catch (err) {
+        console.error('Error fetching IsMcServer data:', err)
+      }
+    }
+
+    fetchIsmcServerStatus()
+
+    const ismcServerIntervalId = setInterval(fetchIsmcServerStatus, pollingInterval)
+
+    return () => clearInterval(ismcServerIntervalId)
+  }, [useMockData, simulateOffline, pollingInterval, configLoaded])
+
+  useEffect(() => {
     document.title = pageTitle
   }, [pageTitle])
 
@@ -207,8 +235,8 @@ function App() {
       <main className="main">
         <div className="container">
           <div className="grid">
-            <ServerStatusCard server={serverData} connectionAddress={serverAddress} />
-            <ServerInfoCard server={serverData} />
+            <ServerStatusCard server={serverData} connectionAddress={serverAddress} mcsrvStatus={mcsrvStatusData} ismcServer={ismcServerData} />
+            <ServerInfoCard server={serverData} mcsrvStatus={mcsrvStatusData} ismcServer={ismcServerData} />
             <PlayerListCard players={serverData.players} />
           </div>
         </div>

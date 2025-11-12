@@ -3,7 +3,7 @@ import Card from './Card'
 import InfoCard from './InfoCard'
 import './ServerStatusCard.css'
 
-function ServerStatusCard({ server, connectionAddress }) {
+function ServerStatusCard({ server, connectionAddress, mcsrvStatus, ismcServer }) {
     const [copyButtonText, setCopyButtonText] = useState('📋')
 
     const handleCopyAddress = async () => {
@@ -41,15 +41,22 @@ function ServerStatusCard({ server, connectionAddress }) {
                 >
                     {connectionAddress}
                 </InfoCard>
-                <InfoCard title="Players">
-                    {server.players?.online || 0} / {server.players?.max || 0}
-                </InfoCard>
+                {mcsrvStatus?.ip && (
+                    <InfoCard title="Public IP">
+                        {mcsrvStatus.ip}
+                    </InfoCard>
+                )}
                 <InfoCard title="Version">
                     {server.version?.name || 'Unknown'}
                 </InfoCard>
                 <InfoCard title="Latency">
                     {server.latency}ms
                 </InfoCard>
+                {ismcServer?.ping !== undefined && (
+                    <InfoCard title="Latency (External)">
+                        {ismcServer.ping}ms
+                    </InfoCard>
+                )}
             </div>
             {
                 server.players && (
