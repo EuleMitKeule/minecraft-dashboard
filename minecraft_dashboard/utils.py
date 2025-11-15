@@ -1,6 +1,7 @@
 """Utility functions for minecraft-dashboard."""
 
 import asyncio
+import ipaddress
 import json
 import logging
 import os
@@ -509,4 +510,25 @@ class NetUtils:
     @staticmethod
     async def resolve_host_to_ip(host: str) -> str:
         """Resolve a hostname to its IP address."""
-        return host  # TODO: Implement actual DNS resolution logic
+        try:
+            ipaddress.ip_address(host)
+            return host
+        except ValueError:
+            pass
+
+        try:
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.get_event_loop()
+
+            infos = await loop.getaddrinfo(host, None)
+            if not infos:
+                return host
+
+            sockaddr = infos[0][4]
+            ip = sockaddr[0]
+            return ip
+        except Exception as exception:
+            logger.debug(f"DNS resolution failed for host '{host}': {exception}")
+            return host
