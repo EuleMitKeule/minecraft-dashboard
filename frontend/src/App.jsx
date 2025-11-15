@@ -116,7 +116,21 @@ function App() {
   const [pageTitle, setPageTitle] = useState('Minecraft Server Dashboard')
   const [headerTitle, setHeaderTitle] = useState('Minecraft Server Dashboard')
   const [frontendLinks, setFrontendLinks] = useState([])
-  const [useExternalData, setUseExternalData] = useState(true)
+  const [useExternalData, setUseExternalData] = useState(() => {
+    try {
+      const stored = localStorage.getItem('useExternalData')
+      return stored === null ? true : stored === 'true'
+    } catch (e) {
+      return true
+    }
+  })
+
+  useEffect(() => {1
+    try {
+      localStorage.setItem('useExternalData', useExternalData ? 'true' : 'false')
+    } catch (e) {
+    }
+  }, [useExternalData])
 
   useEffect(() => {
     const fetchConfig = async () => {
