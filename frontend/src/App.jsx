@@ -134,12 +134,10 @@ function App() {
         if (configResponse.data.use_mock_data) {
           setPageTitle(mockConfigData.page_title)
           setHeaderTitle(mockConfigData.header_title)
-          setServerAddress(mockConfigData.server_address)
           setFrontendLinks(mockConfigData.frontend_links)
         } else {
           setPageTitle(configResponse.data.page_title)
           setHeaderTitle(configResponse.data.header_title)
-          setServerAddress(configResponse.data.server_address || '')
           setFrontendLinks(configResponse.data.frontend_links || [])
         }
 
