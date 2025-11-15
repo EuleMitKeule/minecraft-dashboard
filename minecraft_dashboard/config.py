@@ -11,6 +11,8 @@ from pydantic.dataclasses import dataclass
 
 from minecraft_dashboard.const import (
     CONF_CONFIG_FILE_PATH,
+    CONF_EXTERNAL_PING_HOST,
+    CONF_EXTERNAL_PING_PORT,
     CONF_FRONTEND_HEADER_TITLE,
     CONF_FRONTEND_LINKS,
     CONF_FRONTEND_PAGE_TITLE,
@@ -31,6 +33,8 @@ from minecraft_dashboard.const import (
     CONF_MINECRAFT_SERVER_TIMEOUT,
     CONF_PORT,
     DEFAULT_CONFIG_FILE_PATH,
+    DEFAULT_EXTERNAL_PING_HOST,
+    DEFAULT_EXTERNAL_PING_PORT,
     DEFAULT_FRONTEND_HEADER_TITLE,
     DEFAULT_FRONTEND_LINKS,
     DEFAULT_FRONTEND_PAGE_TITLE,
@@ -51,6 +55,8 @@ from minecraft_dashboard.const import (
     DEFAULT_MINECRAFT_SERVER_TIMEOUT,
     DEFAULT_PORT,
     ENV_CONFIG_FILE_PATH,
+    ENV_EXTERNAL_PING_HOST,
+    ENV_EXTERNAL_PING_PORT,
     ENV_FRONTEND_HEADER_TITLE,
     ENV_FRONTEND_LINKS,
     ENV_FRONTEND_PAGE_TITLE,
@@ -145,6 +151,16 @@ class Config(YAMLWizard, JSONWizard):
         CONF_MINECRAFT_SERVER_TIMEOUT,
         ENV_MINECRAFT_SERVER_TIMEOUT,
         DEFAULT_MINECRAFT_SERVER_TIMEOUT,
+    )
+    external_ping_host: str = DataclassUtils.field(
+        CONF_EXTERNAL_PING_HOST,
+        ENV_EXTERNAL_PING_HOST,
+        DEFAULT_EXTERNAL_PING_HOST,
+    )
+    external_ping_port: int = DataclassUtils.field(
+        CONF_EXTERNAL_PING_PORT,
+        ENV_EXTERNAL_PING_PORT,
+        DEFAULT_EXTERNAL_PING_PORT,
     )
     frontend_use_mock_data: bool = DataclassUtils.field(
         CONF_FRONTEND_USE_MOCK_DATA,

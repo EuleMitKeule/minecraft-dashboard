@@ -77,6 +77,8 @@ class DashboardApi(Routable):
             self.config.minecraft_server_host,
             self.config.minecraft_server_port,
             self.config.minecraft_server_timeout,
+            self.config.external_ping_host,
+            self.config.external_ping_port,
         )
 
     @get(

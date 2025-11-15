@@ -1,9 +1,11 @@
 """Utility functions for minecraft-dashboard."""
 
+import asyncio
 import json
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any, Callable, TypeVar, cast
 
@@ -196,19 +198,54 @@ class MinecraftUtils:
     """Utility functions for Minecraft."""
 
     @staticmethod
-    async def get_status(host: str, port: int, timeout: int) -> StatusData:
+    async def get_external_latency(host: str, port: int, timeout: int) -> float | None:
+        """Get external latency by pinging the specified host."""
+        try:
+            start_time = time.time()
+            _, writer = await asyncio.wait_for(
+                asyncio.open_connection(host, port), timeout=timeout
+            )
+            writer.close()
+            await writer.wait_closed()
+            end_time = time.time()
+            latency = (end_time - start_time) * 1000
+            return round(latency, 2)
+        except (asyncio.TimeoutError, OSError, Exception):
+            return None
+
+    @staticmethod
+    async def get_status(
+        host: str,
+        port: int,
+        timeout: int,
+        external_ping_host: str,
+        external_ping_port: int,
+    ) -> StatusData:
         """Get the status of the Minecraft server."""
         server = await JavaServer.async_lookup(f"{host}:{port}", timeout)
         if not server:
-            return StatusData(online=False)
+            external_latency = await MinecraftUtils.get_external_latency(
+                external_ping_host, external_ping_port, timeout
+            )
+            return StatusData(online=False, external_latency=external_latency)
 
         try:
             status = await server.async_status()
         except Exception:
-            return StatusData(online=False)
+            external_latency = await MinecraftUtils.get_external_latency(
+                external_ping_host, external_ping_port, timeout
+            )
+            return StatusData(online=False, external_latency=external_latency)
 
         if not status:
-            return StatusData(online=False)
+            external_latency = await MinecraftUtils.get_external_latency(
+                external_ping_host, external_ping_port, timeout
+            )
+            return StatusData(online=False, external_latency=external_latency)
+
+        external_latency = await MinecraftUtils.get_external_latency(
+            external_ping_host, external_ping_port, timeout
+        )
 
         players_info = PlayersInfo(
             online=status.players.online,
@@ -264,6 +301,7 @@ class MinecraftUtils:
         return StatusData(
             online=True,
             latency=round(status.latency),
+            external_latency=external_latency,
             players=players_info,
             version=version_info,
             description=status.description,

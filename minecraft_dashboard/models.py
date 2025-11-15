@@ -174,6 +174,7 @@ class StatusData(BaseModel):
 
     online: bool
     latency: float | None = None
+    external_latency: float | None = None
     players: PlayersInfo | None = None
     version: VersionInfo | None = None
     description: str | None = None
