@@ -1,4 +1,4 @@
-from minecraft_dashboard.models import FrontendLink
+from minecraft_dashboard.models import FrontendLinkData
 
 ENV_CONFIG_FILE_PATH = "MINECRAFT_DASHBOARD_CONFIG_FILE_PATH"
 ENV_HOST = "MINECRAFT_DASHBOARD_HOST"
@@ -76,4 +76,4 @@ DEFAULT_FRONTEND_POLLING_INTERVAL_MCSRVSTATUS = 60000
 DEFAULT_FRONTEND_SIMULATE_OFFLINE = False
 DEFAULT_FRONTEND_PAGE_TITLE = "Minecraft Server Dashboard"
 DEFAULT_FRONTEND_HEADER_TITLE = "Minecraft Server Dashboard"
-DEFAULT_FRONTEND_LINKS: list[FrontendLink] = []
+DEFAULT_FRONTEND_LINKS: list[FrontendLinkData] = []

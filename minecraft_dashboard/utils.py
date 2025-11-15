@@ -16,22 +16,19 @@ from dotenv import load_dotenv
 from mcstatus import JavaServer
 
 from minecraft_dashboard.models import (
-    ForgeInfo,
-    ForgeModInfo,
+    InfoData,
     McSrvStatusData,
     McSrvStatusDebugData,
-    McSrvStatusInfoData,
     McSrvStatusMapData,
-    McSrvStatusModData,
     McSrvStatusMotdData,
-    McSrvStatusPlayerData,
-    McSrvStatusPlayersData,
-    McSrvStatusPluginData,
-    McSrvStatusProtocolData,
-    PlayerSample,
-    PlayersInfo,
+    ModData,
+    MotdData,
+    PlayerData,
+    PlayersData,
+    PluginData,
+    ProtocolData,
+    Status,
     StatusData,
-    VersionInfo,
 )
 
 T = TypeVar("T")
@@ -201,108 +198,162 @@ class MinecraftUtils:
     async def get_status(
         host: str,
         port: int,
+        host_external: str,
+        port_external: int,
         timeout: int,
         ping_host: str | None,
         ping_host_external: str,
-    ) -> StatusData:
+    ) -> Status:
+        """Get the status of the Minecraft server."""
+        status_data = await MinecraftUtils._get_status(
+            host,
+            port,
+            timeout,
+            ping_host,
+        )
+        status_data_external = await MinecraftUtils._get_status_external(
+            host_external,
+            port_external,
+            timeout,
+            ping_host_external,
+        )
+
+        return Status(
+            data=status_data,
+            data_external=status_data_external,
+        )
+
+    @staticmethod
+    async def _get_status(
+        host: str,
+        port: int,
+        timeout: int,
+        ping_host: str | None,
+    ) -> StatusData | None:
         """Get the status of the Minecraft server."""
         server = await JavaServer.async_lookup(f"{host}:{port}", timeout)
+        query = await JavaServer.async_query(server)
         if not server:
-            return StatusData(online=False)
+            return None
 
         try:
             status = await server.async_status()
         except Exception:
-            return StatusData(online=False)
+            return None
 
         if not status:
-            return StatusData(online=False)
+            return None
 
-        players_info = PlayersInfo(
+        players = PlayersData(
             online=status.players.online,
             max=status.players.max,
-            sample=[
-                PlayerSample(name=player.name, id=player.id)
+            player_list=[
+                PlayerData(name=player.name, uuid=player.id)
                 for player in (status.players.sample or [])
             ]
             if status.players.sample
             else None,
         )
 
-        version_info = VersionInfo(
-            name=status.version.name,
-            protocol=status.version.protocol,
+        protocol = ProtocolData(
+            name=query.software.version,
+            version=status.version.protocol,
         )
 
-        forge_info = None
-        if status.forge_data:
-            forge_mods = None
-            if status.forge_data.mods:
-                forge_mods = [
-                    ForgeModInfo(
-                        name=mod.name,
-                        marker=mod.marker,
-                    )
-                    for mod in status.forge_data.mods
-                ]
-
-            forge_info = ForgeInfo(
-                mods=forge_mods,
-                channels=[
-                    {
-                        "name": channel.name,
-                        "version": channel.version,
-                        "required": channel.required,
-                    }
-                    for channel in (status.forge_data.channels or [])
-                ]
-                if status.forge_data.channels
-                else None,
-                fml_network_version=status.forge_data.fml_network_version,
+        plugins = [
+            PluginData(
+                name=plugin.split(" ")[0],
+                version=plugin.split(" ")[-1],
             )
+            for plugin in query.software.plugins
+        ]
 
-        motd_plain = None
-        motd_html = None
-        try:
-            motd_plain = status.motd.to_plain()
-            motd_html = status.motd.to_html()
-        except Exception:
-            pass
+        mods = (
+            [
+                ModData(
+                    name=mod.name,
+                    version=mod.marker,
+                )
+                for mod in status.forge_data.mods
+            ]
+            if status.forge_data and status.forge_data.mods
+            else None
+        )
 
-        latency = (
-            round(status.latency)
-            if ping_host is None
+        motd = MotdData(
+            plain=status.motd.to_plain(),
+            html=status.motd.to_html(),
+        )
+
+        latency = round(
+            status.latency
+            if not ping_host
             else await NetUtils.get_latency(ping_host, timeout)
         )
-        latency_external = await NetUtils.get_latency(ping_host_external, timeout)
+
+        ip = await NetUtils.resolve_host_to_ip(host)
 
         return StatusData(
-            online=True,
             latency=latency,
-            latency_external=latency_external,
-            players=players_info,
-            version=version_info,
-            description=status.description,
-            motd_plain=motd_plain,
-            motd_html=motd_html,
-            enforces_secure_chat=status.enforces_secure_chat,
-            has_icon=status.icon is not None,
-            icon_base64=status.icon,
-            forge_data=forge_info,
+            ip=ip,
+            port=port,
+            hostname=host,
+            version=query.software.version,
+            protocol=protocol,
+            icon=status.icon,
+            software=status.version.name,
+            map=query.map_name,
+            motd=motd,
+            players=players,
+            plugins=plugins,
+            mods=mods,
         )
 
     @staticmethod
-    async def get_mcsrvstatus(
-        server_address: str, is_bedrock: bool = False, timeout: int = 10
-    ) -> McSrvStatusData:
+    async def _get_status_external(
+        host: str, port: int, timeout: int, ping_host: str
+    ) -> StatusData | None:
         """Get the status from mcsrvstat API."""
+        mcsrvstat_status = await MinecraftUtils._get_mcsrvstat_status(
+            host, port, timeout
+        )
+
+        if not mcsrvstat_status:
+            return None
+
+        latency = round(await NetUtils.get_latency(ping_host, timeout))
+
+        return StatusData(
+            latency=latency,
+            ip=mcsrvstat_status.ip,
+            port=mcsrvstat_status.port,
+            hostname=mcsrvstat_status.hostname,
+            version=mcsrvstat_status.version,
+            protocol=mcsrvstat_status.protocol,
+            icon=mcsrvstat_status.icon,
+            software=mcsrvstat_status.software,
+            map=mcsrvstat_status.map.clean if mcsrvstat_status.map else "",
+            motd=MotdData(
+                plain="".join(mcsrvstat_status.motd.clean)
+                if mcsrvstat_status.motd
+                else "",
+                html="".join(mcsrvstat_status.motd.html)
+                if mcsrvstat_status.motd
+                else "",
+            ),
+            players=mcsrvstat_status.players,
+            plugins=mcsrvstat_status.plugins,
+            mods=mcsrvstat_status.mods,
+        )
+
+    @staticmethod
+    async def _get_mcsrvstat_status(
+        host: str, port: int, timeout: int
+    ) -> McSrvStatusData | None:
         base_url = "https://api.mcsrvstat.us"
         version = "3"
 
-        if is_bedrock:
-            url = f"{base_url}/bedrock/{version}/{server_address}"
-        else:
-            url = f"{base_url}/{version}/{server_address}"
+        url = f"{base_url}/{version}/{host}:{port}"
 
         headers = {"User-Agent": "minecraft-dashboard"}
 
@@ -317,7 +368,7 @@ class MinecraftUtils:
 
                 protocol_data = None
                 if "protocol" in data and data["protocol"]:
-                    protocol_data = McSrvStatusProtocolData(**data["protocol"])
+                    protocol_data = ProtocolData(**data["protocol"])
 
                 motd_data = None
                 if "motd" in data and data["motd"]:
@@ -333,10 +384,9 @@ class MinecraftUtils:
                     player_list = None
                     if "list" in players_dict and players_dict["list"]:
                         player_list = [
-                            McSrvStatusPlayerData(**player)
-                            for player in players_dict["list"]
+                            PlayerData(**player) for player in players_dict["list"]
                         ]
-                    players_data = McSrvStatusPlayersData(
+                    players_data = PlayersData(
                         online=players_dict["online"],
                         max=players_dict["max"],
                         player_list=player_list,
@@ -344,17 +394,15 @@ class MinecraftUtils:
 
                 plugins_data = None
                 if "plugins" in data and data["plugins"]:
-                    plugins_data = [
-                        McSrvStatusPluginData(**plugin) for plugin in data["plugins"]
-                    ]
+                    plugins_data = [PluginData(**plugin) for plugin in data["plugins"]]
 
                 mods_data = None
                 if "mods" in data and data["mods"]:
-                    mods_data = [McSrvStatusModData(**mod) for mod in data["mods"]]
+                    mods_data = [ModData(**mod) for mod in data["mods"]]
 
                 info_data = None
                 if "info" in data and data["info"]:
-                    info_data = McSrvStatusInfoData(**data["info"])
+                    info_data = InfoData(**data["info"])
 
                 return McSrvStatusData(
                     online=data["online"],
@@ -381,17 +429,17 @@ class MinecraftUtils:
                 logger.error(
                     f"HTTP error occurred while fetching mcsrvstat data: {exception}"
                 )
-                raise
+                return None
             except httpx.RequestError as exception:
                 logger.error(
                     f"Request error occurred while fetching mcsrvstat data: {exception}"
                 )
-                raise
+                return None
             except Exception as exception:
                 logger.error(
                     f"Unexpected error occurred while fetching mcsrvstat data: {exception}"
                 )
-                raise
+                return None
 
 
 class OpenApiUtils:
@@ -413,8 +461,8 @@ class OpenApiUtils:
 
 class NetUtils:
     @staticmethod
-    async def get_latency(host: str, timeout: float = 1.5) -> float | None:
-        # Use correct flag depending on OS
+    async def get_latency(host: str, timeout: float = 1.5) -> float:
+        """Get the network latency to a host using the system ping command."""
         count_flag = "-n" if sys.platform.startswith("win") else "-c"
         cmd = ["ping", count_flag, "1", host]
 
@@ -429,14 +477,13 @@ class NetUtils:
                 stdout, _ = await asyncio.wait_for(proc.communicate(), timeout)
             except asyncio.TimeoutError:
                 proc.kill()
-                return None
+                raise asyncio.TimeoutError("Ping command timed out")
 
             if proc.returncode != 0:
-                return None
+                raise ValueError("Ping command failed")
 
             output = stdout.decode(errors="ignore")
 
-            # -------- Attempt A: language-independent "time=" (Linux/macOS)
             match = re.search(
                 r"time[=<]?\s*([\d.,]+)\s*ms",
                 output,
@@ -444,8 +491,6 @@ class NetUtils:
             )
 
             if not match:
-                # -------- Attempt B: extract the ms value right before ttl= (Windows any locale)
-                # Example: "Bytes=32 Zeit=9ms TTL=118"
                 match = re.search(
                     r"[=<]\s*([\d.,]+)\s*ms[^m]*ttl",
                     output,
@@ -457,6 +502,11 @@ class NetUtils:
                 return float(val)
 
         except Exception:
-            return None
+            raise ValueError("Ping command failed")
 
-        return None
+        raise ValueError("Ping command failed")
+
+    @staticmethod
+    async def resolve_host_to_ip(host: str) -> str:
+        """Resolve a hostname to its IP address."""
+        return host  # TODO: Implement actual DNS resolution logic

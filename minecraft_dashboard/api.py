@@ -1,17 +1,14 @@
 """API module for minecraft-dashboard."""
 
-import httpx
 from classy_fastapi import get
 from classy_fastapi.routable import Routable
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
 
 from minecraft_dashboard.config import Config
 from minecraft_dashboard.models import (
     ConfigData,
     HealthCheckData,
-    McSrvStatusData,
-    StatusData,
+    Status,
 )
 from minecraft_dashboard.utils import MinecraftUtils
 
@@ -69,47 +66,16 @@ class DashboardApi(Routable):
         summary="Get the status of the Minecraft server",
         tags=["Status"],
         status_code=200,
-        response_model=StatusData,
+        response_model=Status,
     )
-    async def get_status(self) -> StatusData:
+    async def get_status(self) -> Status:
         """Get the status of the Minecraft server."""
         return await MinecraftUtils.get_status(
             self.config.minecraft_server_host,
             self.config.minecraft_server_port,
+            self.config.effective_minecraft_server_host_external,
+            self.config.effective_minecraft_server_port_external,
             self.config.minecraft_server_timeout,
             self.config.ping_host,
             self.config.ping_host_external,
         )
-
-    @get(
-        "/status-mcsrvstatus",
-        summary="Get the status from McSrvStat API",
-        tags=["Status"],
-        status_code=200,
-        response_model=McSrvStatusData,
-    )
-    async def get_status_mcsrvstatus(self):
-        """Get the status from McSrvStat API."""
-        host_external = self.config.effective_minecraft_server_host_external
-        port_external = self.config.effective_minecraft_server_port_external
-        server_address = f"{host_external}:{port_external}"
-
-        try:
-            return await MinecraftUtils.get_mcsrvstatus(
-                server_address, is_bedrock=False, timeout=10
-            )
-        except httpx.ReadTimeout:
-            return JSONResponse(
-                status_code=504,
-                content={"error": "Timeout while contacting mcsrvstat.us API"},
-            )
-        except httpx.RequestError as exc:
-            return JSONResponse(
-                status_code=504,
-                content={"error": f"Request error: {str(exc)}"},
-            )
-        except Exception as exc:
-            return JSONResponse(
-                status_code=500,
-                content={"error": f"Unexpected error: {str(exc)}"},
-            )

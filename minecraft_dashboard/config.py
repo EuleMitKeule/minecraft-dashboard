@@ -77,7 +77,7 @@ from minecraft_dashboard.const import (
     ENV_PING_HOST_EXTERNAL,
     ENV_PORT,
 )
-from minecraft_dashboard.models import FrontendLink
+from minecraft_dashboard.models import FrontendLinkData
 from minecraft_dashboard.utils import DataclassUtils
 
 
@@ -187,7 +187,7 @@ class Config(YAMLWizard, JSONWizard):
         ENV_FRONTEND_HEADER_TITLE,
         DEFAULT_FRONTEND_HEADER_TITLE,
     )
-    frontend_links: list[FrontendLink] = DataclassUtils.field(
+    frontend_links: list[FrontendLinkData] = DataclassUtils.field(
         CONF_FRONTEND_LINKS,
         ENV_FRONTEND_LINKS,
         DEFAULT_FRONTEND_LINKS,

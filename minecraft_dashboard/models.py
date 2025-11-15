@@ -28,7 +28,7 @@ class McSrvStatusDebugData(BaseModel):
     apiversion: int
 
 
-class McSrvStatusProtocolData(BaseModel):
+class ProtocolData(BaseModel):
     """McSrvStat API protocol data model."""
 
     version: int
@@ -51,36 +51,36 @@ class McSrvStatusMapData(BaseModel):
     html: str
 
 
-class McSrvStatusPlayerData(BaseModel):
+class PlayerData(BaseModel):
     """McSrvStat API player data model."""
 
     name: str
     uuid: str
 
 
-class McSrvStatusPlayersData(BaseModel):
+class PlayersData(BaseModel):
     """McSrvStat API players data model."""
 
     online: int
     max: int
-    player_list: list[McSrvStatusPlayerData] | None = None
+    player_list: list[PlayerData] | None = None
 
 
-class McSrvStatusPluginData(BaseModel):
+class PluginData(BaseModel):
     """McSrvStat API plugin data model."""
 
     name: str
     version: str
 
 
-class McSrvStatusModData(BaseModel):
+class ModData(BaseModel):
     """McSrvStat API mod data model."""
 
     name: str
     version: str
 
 
-class McSrvStatusInfoData(BaseModel):
+class InfoData(BaseModel):
     """McSrvStat API info data model."""
 
     raw: list[str]
@@ -97,7 +97,7 @@ class McSrvStatusData(BaseModel):
     hostname: str | None = None
     debug: McSrvStatusDebugData
     version: str | None = None
-    protocol: McSrvStatusProtocolData | None = None
+    protocol: ProtocolData | None = None
     icon: str | None = None
     software: str | None = None
     map: McSrvStatusMapData | None = None
@@ -105,14 +105,14 @@ class McSrvStatusData(BaseModel):
     serverid: str | None = None
     eula_blocked: bool | None = None
     motd: McSrvStatusMotdData | None = None
-    players: McSrvStatusPlayersData | None = None
-    plugins: list[McSrvStatusPluginData] | None = None
-    mods: list[McSrvStatusModData] | None = None
-    info: McSrvStatusInfoData | None = None
+    players: PlayersData | None = None
+    plugins: list[PluginData] | None = None
+    mods: list[ModData] | None = None
+    info: InfoData | None = None
 
 
 @dataclass
-class FrontendLink(YAMLWizard, JSONWizard):
+class FrontendLinkData(YAMLWizard, JSONWizard):
     """Frontend link data model."""
 
     title: str
@@ -129,58 +129,37 @@ class ConfigData(BaseModel):
     page_title: str
     header_title: str
     server_address: str
-    frontend_links: list[FrontendLink] = []
+    frontend_links: list[FrontendLinkData] = []
 
 
-class PlayerSample(BaseModel):
-    """Player sample data model."""
+class MotdData(BaseModel):
+    """Minecraft server motd data model."""
 
-    name: str
-    id: str
-
-
-class PlayersInfo(BaseModel):
-    """Players information data model."""
-
-    online: int
-    max: int
-    sample: list[PlayerSample] | None = None
-
-
-class VersionInfo(BaseModel):
-    """Version information data model."""
-
-    name: str
-    protocol: int
-
-
-class ForgeModInfo(BaseModel):
-    """Forge mod information data model."""
-
-    name: str
-    marker: str
-
-
-class ForgeInfo(BaseModel):
-    """Forge data model."""
-
-    mods: list[ForgeModInfo] | None = None
-    channels: list[dict] | None = None
-    fml_network_version: int | None = None
+    plain: str
+    html: str
 
 
 class StatusData(BaseModel):
     """Minecraft server status data model."""
 
-    online: bool
-    latency: float | None = None
-    latency_external: float | None = None
-    players: PlayersInfo | None = None
-    version: VersionInfo | None = None
-    description: str | None = None
-    motd_plain: str | None = None
-    motd_html: str | None = None
-    enforces_secure_chat: bool | None = None
-    has_icon: bool | None = None
-    icon_base64: str | None = None
-    forge_data: ForgeInfo | None = None
+    latency: int | None = None
+    ip: str | None = None
+    port: int | None = None
+    hostname: str | None = None
+    version: str | None = None
+    protocol: ProtocolData | None = None
+    icon: str | None = None
+    software: str | None = None
+    map: str | None = None
+    motd: MotdData | None = None
+    players: PlayersData | None = None
+    plugins: list[PluginData] | None = None
+    mods: list[ModData] | None = None
+    info: InfoData | None = None
+
+
+class Status(BaseModel):
+    """Minecraft server status model."""
+
+    data: StatusData | None = None
+    data_external: StatusData | None = None

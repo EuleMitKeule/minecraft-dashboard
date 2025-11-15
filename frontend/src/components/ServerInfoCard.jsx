@@ -2,19 +2,14 @@ import Card from './Card'
 import InfoCard from './InfoCard'
 import './ServerInfoCard.css'
 
-function ServerInfoCard({ server, mcsrvStatus }) {
-    const forgeModsCount = server.forge_data?.mods?.length || 0
+function ServerInfoCard({ serverData }) {
+    const forgeModsCount = serverData?.forge_data?.mods?.length || 0
 
     return (
         <Card title="Server Information">
             <div className="card-grid">
-                <InfoCard title="Version">{server.version?.name || 'Unknown'}</InfoCard>
-                <InfoCard title="Protocol">{server.version?.protocol || 'Unknown'}</InfoCard>
-                {server.enforces_secure_chat !== null && (
-                    <InfoCard title="Secure Chat">
-                        {server.enforces_secure_chat ? 'Enabled' : 'Disabled'}
-                    </InfoCard>
-                )}
+                <InfoCard title="Version">{serverData?.version || 'Unknown'}</InfoCard>
+                <InfoCard title="Protocol">{serverData?.protocol?.version ?? serverData?.protocol?.version ?? 'Unknown'}</InfoCard>
             </div>
 
             {/* <InfoCard title={`Forge Mods (${forgeModsCount})`}>
@@ -34,14 +29,14 @@ function ServerInfoCard({ server, mcsrvStatus }) {
                 </div>
             </InfoCard> */}
 
-            {server.motd_html && (
+            {serverData?.motd?.html && (
                 <InfoCard
                     title="Motd"
-                    className={`motd-card ${server.motd_html.includes('<br>') || server.motd_html.includes('\n') ? 'motd-multiline' : 'motd-singleline'}`}
+                    className={`motd-card ${serverData.motd.html.includes('<br>') || serverData.motd.html.includes('\n') ? 'motd-multiline' : 'motd-singleline'}`}
                 >
                     <div
                         className="motd-content"
-                        dangerouslySetInnerHTML={{ __html: server.motd_html }}
+                        dangerouslySetInnerHTML={{ __html: serverData.motd.html }}
                     />
                 </InfoCard>
             )}

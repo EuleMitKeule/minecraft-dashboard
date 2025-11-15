@@ -3,8 +3,9 @@ import Card from './Card'
 import InfoCard from './InfoCard'
 import './ServerStatusCard.css'
 
-function ServerStatusCard({ server, connectionAddress, mcsrvStatus, useExternalLatency }) {
+function ServerStatusCard({ serverData }) {
     const [copyButtonText, setCopyButtonText] = useState('📋')
+    const connectionAddress = `${serverData?.hostname}:${serverData?.port}`
 
     const handleCopyAddress = async () => {
         if (!connectionAddress) return
@@ -18,12 +19,11 @@ function ServerStatusCard({ server, connectionAddress, mcsrvStatus, useExternalL
         }
     }
 
+    const isOnline = !!serverData
     const statusBadge = {
-        text: server.online ? '🟢 Online' : '🔴 Offline',
-        variant: server.online ? 'online' : 'offline'
+        text: isOnline ? '🟢 Online' : '🔴 Offline',
+        variant: isOnline ? 'online' : 'offline'
     }
-
-    const latency = useExternalLatency ? server.latency : server.latency
 
     return (
         <Card title="Server Status" badge={statusBadge}>
@@ -43,27 +43,27 @@ function ServerStatusCard({ server, connectionAddress, mcsrvStatus, useExternalL
                 >
                     {connectionAddress}
                 </InfoCard>
-                {mcsrvStatus?.ip && (
-                    <InfoCard title="Public IP">
-                        {mcsrvStatus.ip}
+                {serverData?.ip && (
+                    <InfoCard title="IP Address">
+                        {serverData?.ip}
                     </InfoCard>
                 )}
                 <InfoCard title="Latency">
-                    {latency !== null && latency !== undefined ? `${latency}ms` : 'N/A'}
+                    {serverData?.latency !== null && serverData?.latency !== undefined ? `${serverData.latency}ms` : 'N/A'}
                 </InfoCard>
             </div>
             {
-                server.players && (
+                serverData?.players && (
                     <InfoCard title="Player Capacity">
                         <div className="player-bar">
                             <div className="player-bar-label">
-                                <span>{server.players.online}/{server.players.max}</span>
-                                <span>{Math.round((server.players.online / server.players.max) * 100)}%</span>
+                                <span>{serverData?.players?.online}/{serverData?.players?.max}</span>
+                                <span>{Math.round((serverData?.players?.online / serverData?.players?.max) * 100)}%</span>
                             </div>
                             <div className="player-bar-track">
                                 <div
                                     className="player-bar-fill"
-                                    style={{ width: `${(server.players.online / server.players.max) * 100}%` }}
+                                    style={{ width: `${(serverData?.players?.online / serverData?.players?.max) * 100}%` }}
                                 />
                             </div>
                         </div>
