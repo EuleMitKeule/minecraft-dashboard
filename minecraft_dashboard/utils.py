@@ -4,8 +4,8 @@ import asyncio
 import json
 import logging
 import os
+import re
 import sys
-import time
 from pathlib import Path
 from typing import Any, Callable, TypeVar, cast
 
@@ -198,54 +198,25 @@ class MinecraftUtils:
     """Utility functions for Minecraft."""
 
     @staticmethod
-    async def get_external_latency(host: str, port: int, timeout: int) -> float | None:
-        """Get external latency by pinging the specified host."""
-        try:
-            start_time = time.time()
-            _, writer = await asyncio.wait_for(
-                asyncio.open_connection(host, port), timeout=timeout
-            )
-            writer.close()
-            await writer.wait_closed()
-            end_time = time.time()
-            latency = (end_time - start_time) * 1000
-            return round(latency, 2)
-        except (asyncio.TimeoutError, OSError, Exception):
-            return None
-
-    @staticmethod
     async def get_status(
         host: str,
         port: int,
         timeout: int,
-        external_ping_host: str,
-        external_ping_port: int,
+        ping_host: str | None,
+        ping_host_external: str,
     ) -> StatusData:
         """Get the status of the Minecraft server."""
         server = await JavaServer.async_lookup(f"{host}:{port}", timeout)
         if not server:
-            external_latency = await MinecraftUtils.get_external_latency(
-                external_ping_host, external_ping_port, timeout
-            )
-            return StatusData(online=False, external_latency=external_latency)
+            return StatusData(online=False)
 
         try:
             status = await server.async_status()
         except Exception:
-            external_latency = await MinecraftUtils.get_external_latency(
-                external_ping_host, external_ping_port, timeout
-            )
-            return StatusData(online=False, external_latency=external_latency)
+            return StatusData(online=False)
 
         if not status:
-            external_latency = await MinecraftUtils.get_external_latency(
-                external_ping_host, external_ping_port, timeout
-            )
-            return StatusData(online=False, external_latency=external_latency)
-
-        external_latency = await MinecraftUtils.get_external_latency(
-            external_ping_host, external_ping_port, timeout
-        )
+            return StatusData(online=False)
 
         players_info = PlayersInfo(
             online=status.players.online,
@@ -298,10 +269,17 @@ class MinecraftUtils:
         except Exception:
             pass
 
+        latency = (
+            round(status.latency)
+            if ping_host is None
+            else await NetUtils.get_latency(ping_host, timeout)
+        )
+        latency_external = await NetUtils.get_latency(ping_host_external, timeout)
+
         return StatusData(
             online=True,
-            latency=round(status.latency),
-            external_latency=external_latency,
+            latency=latency,
+            latency_external=latency_external,
             players=players_info,
             version=version_info,
             description=status.description,
@@ -431,3 +409,54 @@ class OpenApiUtils:
         logger.info(f"OpenAPI specification written to {output_path}")
 
         return openapi_schema
+
+
+class NetUtils:
+    @staticmethod
+    async def get_latency(host: str, timeout: float = 1.5) -> float | None:
+        # Use correct flag depending on OS
+        count_flag = "-n" if sys.platform.startswith("win") else "-c"
+        cmd = ["ping", count_flag, "1", host]
+
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+
+            try:
+                stdout, _ = await asyncio.wait_for(proc.communicate(), timeout)
+            except asyncio.TimeoutError:
+                proc.kill()
+                return None
+
+            if proc.returncode != 0:
+                return None
+
+            output = stdout.decode(errors="ignore")
+
+            # -------- Attempt A: language-independent "time=" (Linux/macOS)
+            match = re.search(
+                r"time[=<]?\s*([\d.,]+)\s*ms",
+                output,
+                flags=re.IGNORECASE,
+            )
+
+            if not match:
+                # -------- Attempt B: extract the ms value right before ttl= (Windows any locale)
+                # Example: "Bytes=32 Zeit=9ms TTL=118"
+                match = re.search(
+                    r"[=<]\s*([\d.,]+)\s*ms[^m]*ttl",
+                    output,
+                    flags=re.IGNORECASE,
+                )
+
+            if match:
+                val = match.group(1).replace(",", ".")
+                return float(val)
+
+        except Exception:
+            return None
+
+        return None

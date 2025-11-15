@@ -50,9 +50,9 @@ class DashboardApi(Routable):
     )
     async def get_config(self) -> ConfigData:
         """Get dashboard configuration endpoint."""
-        external_host = self.config.effective_minecraft_server_host_external
-        external_port = self.config.effective_minecraft_server_port_external
-        server_address = f"{external_host}:{external_port}"
+        host_external = self.config.effective_minecraft_server_host_external
+        port_external = self.config.effective_minecraft_server_port_external
+        server_address = f"{host_external}:{port_external}"
 
         return ConfigData(
             use_mock_data=self.config.frontend_use_mock_data,
@@ -77,8 +77,8 @@ class DashboardApi(Routable):
             self.config.minecraft_server_host,
             self.config.minecraft_server_port,
             self.config.minecraft_server_timeout,
-            self.config.external_ping_host,
-            self.config.external_ping_port,
+            self.config.ping_host,
+            self.config.ping_host_external,
         )
 
     @get(
@@ -90,9 +90,9 @@ class DashboardApi(Routable):
     )
     async def get_status_mcsrvstatus(self):
         """Get the status from McSrvStat API."""
-        external_host = self.config.effective_minecraft_server_host_external
-        external_port = self.config.effective_minecraft_server_port_external
-        server_address = f"{external_host}:{external_port}"
+        host_external = self.config.effective_minecraft_server_host_external
+        port_external = self.config.effective_minecraft_server_port_external
+        server_address = f"{host_external}:{port_external}"
 
         try:
             return await MinecraftUtils.get_mcsrvstatus(
