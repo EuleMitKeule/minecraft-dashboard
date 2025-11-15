@@ -125,7 +125,8 @@ function App() {
     }
   })
 
-  useEffect(() => {1
+  useEffect(() => {
+    1
     try {
       localStorage.setItem('useExternalData', useExternalData ? 'true' : 'false')
     } catch (e) {
