@@ -105,9 +105,29 @@ const mockExternalData = {
 }
 
 function App() {
-  const [serverData, setServerData] = useState(null)
-  const [serverDataExternal, setServerExternalData] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [serverData, setServerData] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem('serverData')
+      return cached ? JSON.parse(cached) : null
+    } catch (e) {
+      return null
+    }
+  })
+  const [serverDataExternal, setServerExternalData] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem('serverDataExternal')
+      return cached ? JSON.parse(cached) : null
+    } catch (e) {
+      return null
+    }
+  })
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem('serverData')
+    } catch (e) {
+      return true
+    }
+  })
   const [error, setError] = useState(null)
   const [pollingInterval, setPollingInterval] = useState(5000)
   const [useMockData, setUseMockData] = useState(null)
@@ -173,8 +193,25 @@ function App() {
   useEffect(() => {
     if (!configLoaded) return
 
+    const hasCache = sessionStorage.getItem('serverData')
+    const lastFetchTime = sessionStorage.getItem('lastFetchTime')
+    const now = Date.now()
+    const minFetchInterval = 1000
+
+    let initialDelay = 0
+    if (hasCache) {
+      initialDelay = 2000
+    } else if (lastFetchTime) {
+      const timeSinceLastFetch = now - parseInt(lastFetchTime, 10)
+      if (timeSinceLastFetch < minFetchInterval) {
+        initialDelay = minFetchInterval - timeSinceLastFetch
+      }
+    }
+
     const fetchStatus = async () => {
       try {
+        sessionStorage.setItem('lastFetchTime', Date.now().toString())
+
         if (simulateOffline) {
           setServerData(mockServerOfflineData)
           setServerExternalData(mockServerOfflineData)
@@ -184,7 +221,7 @@ function App() {
             latency: Math.round(Math.random() * (500 - 5 + 1)) + 5
           }
           setServerData(newServerData)
-          setServerExternalData(useExternalData ? mockExternalData : newServerData)
+          setServerExternalData(mockExternalData)
         } else {
           const statusResponse = await client.GET('/api/status')
 
@@ -193,25 +230,34 @@ function App() {
           }
 
           const internalData = statusResponse.data.data
-          const externalData = (useExternalData && statusResponse.data.data_external) ? statusResponse.data.data_external : internalData
+          const externalData = statusResponse.data.data_external || internalData
 
           setServerData(internalData)
           setServerExternalData(externalData)
+
+          try {
+            sessionStorage.setItem('serverData', JSON.stringify(internalData))
+            sessionStorage.setItem('serverDataExternal', JSON.stringify(externalData))
+          } catch (e) {
+            console.error('Failed to cache server data:', e)
+          }
         }
         setError(null)
+        setLoading(false)
       } catch (err) {
         setError(err.message)
-      } finally {
         setLoading(false)
       }
     }
 
-    fetchStatus()
-
+    const initialTimeout = setTimeout(fetchStatus, initialDelay)
     const statusIntervalId = setInterval(fetchStatus, pollingInterval)
 
-    return () => clearInterval(statusIntervalId)
-  }, [useMockData, simulateOffline, pollingInterval, configLoaded, useExternalData])
+    return () => {
+      clearTimeout(initialTimeout)
+      clearInterval(statusIntervalId)
+    }
+  }, [useMockData, simulateOffline, pollingInterval, configLoaded])
 
 
   useEffect(() => {

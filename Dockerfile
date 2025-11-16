@@ -6,6 +6,7 @@ RUN npm install
 
 COPY frontend ./
 COPY scripts ../scripts
+RUN rm ./.env
 
 RUN apk add --no-cache python3 curl ca-certificates
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
@@ -20,7 +21,7 @@ RUN npm run build
 
 FROM python:3.13-slim AS backend
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates iputils-ping
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
 

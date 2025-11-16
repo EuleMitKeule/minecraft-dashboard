@@ -70,7 +70,7 @@ async function generateFetchClient() {
 import createClient from 'openapi-fetch';
 
 const client = createClient<paths>({
-  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000'
+  baseUrl: import.meta.env.VITE_API_URL || ''
 });
 
 export default client;

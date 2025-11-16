@@ -76,6 +76,6 @@ class DashboardApi(Routable):
             self.config.effective_minecraft_server_host_external,
             self.config.effective_minecraft_server_port_external,
             self.config.minecraft_server_timeout,
-            self.config.ping_host,
             self.config.ping_host_external,
+            self.config.ping_port_external,
         )

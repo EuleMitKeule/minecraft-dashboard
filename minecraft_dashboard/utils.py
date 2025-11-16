@@ -5,7 +5,6 @@ import ipaddress
 import json
 import logging
 import os
-import re
 import sys
 from pathlib import Path
 from typing import Any, Callable, TypeVar, cast
@@ -15,6 +14,7 @@ import httpx
 from dataclass_wizard import json_field
 from dotenv import load_dotenv
 from mcstatus import JavaServer
+from tcp_latency import measure_latency
 
 from minecraft_dashboard.models import (
     InfoData,
@@ -202,21 +202,21 @@ class MinecraftUtils:
         host_external: str,
         port_external: int,
         timeout: int,
-        ping_host: str | None,
         ping_host_external: str,
+        ping_port_external: int,
     ) -> Status:
         """Get the status of the Minecraft server."""
         status_data = await MinecraftUtils._get_status(
             host,
             port,
             timeout,
-            ping_host,
         )
         status_data_external = await MinecraftUtils._get_status_external(
             host_external,
             port_external,
             timeout,
             ping_host_external,
+            ping_port_external,
         )
 
         return Status(
@@ -229,7 +229,6 @@ class MinecraftUtils:
         host: str,
         port: int,
         timeout: int,
-        ping_host: str | None,
     ) -> StatusData | None:
         """Get the status of the Minecraft server."""
         server = await JavaServer.async_lookup(f"{host}:{port}", timeout)
@@ -286,16 +285,10 @@ class MinecraftUtils:
             html=status.motd.to_html(),
         )
 
-        latency = round(
-            status.latency
-            if not ping_host
-            else await NetUtils.get_latency(ping_host, timeout)
-        )
-
         ip = await NetUtils.resolve_host_to_ip(host)
 
         return StatusData(
-            latency=latency,
+            latency=round(status.latency),
             ip=ip,
             port=port,
             hostname=host,
@@ -312,7 +305,7 @@ class MinecraftUtils:
 
     @staticmethod
     async def _get_status_external(
-        host: str, port: int, timeout: int, ping_host: str
+        host: str, port: int, timeout: int, ping_host: str, ping_port: int
     ) -> StatusData | None:
         """Get the status from mcsrvstat API."""
         mcsrvstat_status = await MinecraftUtils._get_mcsrvstat_status(
@@ -322,7 +315,8 @@ class MinecraftUtils:
         if not mcsrvstat_status:
             return None
 
-        latency = round(await NetUtils.get_latency(ping_host, timeout))
+        latency_value = await NetUtils.get_latency(ping_host, ping_port, timeout)
+        latency = -1 if latency_value == float("inf") else round(latency_value)
 
         return StatusData(
             latency=latency,
@@ -462,50 +456,17 @@ class OpenApiUtils:
 
 class NetUtils:
     @staticmethod
-    async def get_latency(host: str, timeout: float = 1.5) -> float:
-        """Get the network latency to a host using the system ping command."""
-        count_flag = "-n" if sys.platform.startswith("win") else "-c"
-        cmd = ["ping", count_flag, "1", host]
+    async def get_latency(host: str, port: int, timeout: float = 1.5) -> float:
+        """Get the network latency to a host using TCP connection time with multiple measurements."""
+        latencies = measure_latency(
+            host=host,
+            port=port,
+            runs=3,
+            timeout=timeout,
+        )
 
-        try:
-            proc = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-
-            try:
-                stdout, _ = await asyncio.wait_for(proc.communicate(), timeout)
-            except asyncio.TimeoutError:
-                proc.kill()
-                raise asyncio.TimeoutError("Ping command timed out")
-
-            if proc.returncode != 0:
-                raise ValueError("Ping command failed")
-
-            output = stdout.decode(errors="ignore")
-
-            match = re.search(
-                r"time[=<]?\s*([\d.,]+)\s*ms",
-                output,
-                flags=re.IGNORECASE,
-            )
-
-            if not match:
-                match = re.search(
-                    r"[=<]\s*([\d.,]+)\s*ms[^m]*ttl",
-                    output,
-                    flags=re.IGNORECASE,
-                )
-
-            if match:
-                val = match.group(1).replace(",", ".")
-                return float(val)
-
-        except Exception:
-            raise ValueError("Ping command failed")
-
-        raise ValueError("Ping command failed")
+        mean_latency = sum(latencies) / len(latencies) if latencies else float("inf")
+        return mean_latency
 
     @staticmethod
     async def resolve_host_to_ip(host: str) -> str:

@@ -29,8 +29,8 @@ from minecraft_dashboard.const import (
     CONF_MINECRAFT_SERVER_PORT,
     CONF_MINECRAFT_SERVER_PORT_EXTERNAL,
     CONF_MINECRAFT_SERVER_TIMEOUT,
-    CONF_PING_HOST,
     CONF_PING_HOST_EXTERNAL,
+    CONF_PING_PORT_EXTERNAL,
     CONF_PORT,
     DEFAULT_CONFIG_FILE_PATH,
     DEFAULT_FRONTEND_HEADER_TITLE,
@@ -51,8 +51,8 @@ from minecraft_dashboard.const import (
     DEFAULT_MINECRAFT_SERVER_PORT,
     DEFAULT_MINECRAFT_SERVER_PORT_EXTERNAL,
     DEFAULT_MINECRAFT_SERVER_TIMEOUT,
-    DEFAULT_PING_HOST,
     DEFAULT_PING_HOST_EXTERNAL,
+    DEFAULT_PING_PORT_EXTERNAL,
     DEFAULT_PORT,
     ENV_CONFIG_FILE_PATH,
     ENV_FRONTEND_HEADER_TITLE,
@@ -73,8 +73,8 @@ from minecraft_dashboard.const import (
     ENV_MINECRAFT_SERVER_PORT,
     ENV_MINECRAFT_SERVER_PORT_EXTERNAL,
     ENV_MINECRAFT_SERVER_TIMEOUT,
-    ENV_PING_HOST,
     ENV_PING_HOST_EXTERNAL,
+    ENV_PING_PORT_EXTERNAL,
     ENV_PORT,
 )
 from minecraft_dashboard.models import FrontendLinkData
@@ -152,15 +152,15 @@ class Config(YAMLWizard, JSONWizard):
         ENV_MINECRAFT_SERVER_TIMEOUT,
         DEFAULT_MINECRAFT_SERVER_TIMEOUT,
     )
-    ping_host: str | None = DataclassUtils.field(
-        CONF_PING_HOST,
-        ENV_PING_HOST,
-        DEFAULT_PING_HOST,
-    )
     ping_host_external: str = DataclassUtils.field(
         CONF_PING_HOST_EXTERNAL,
         ENV_PING_HOST_EXTERNAL,
         DEFAULT_PING_HOST_EXTERNAL,
+    )
+    ping_port_external: int = DataclassUtils.field(
+        CONF_PING_PORT_EXTERNAL,
+        ENV_PING_PORT_EXTERNAL,
+        DEFAULT_PING_PORT_EXTERNAL,
     )
     frontend_use_mock_data: bool = DataclassUtils.field(
         CONF_FRONTEND_USE_MOCK_DATA,
