@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { existsSync } from 'fs';
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, writeFile, unlink } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
@@ -14,6 +14,11 @@ const openapiSpecPath = path.join(rootDirectory, 'openapi.json');
 
 async function generateOpenApiSpec() {
     console.log('Generating OpenAPI specification from backend code...');
+
+    if (existsSync(openapiSpecPath)) {
+        await unlink(openapiSpecPath);
+        console.log('Existing OpenAPI spec deleted, regenerating...');
+    }
 
     try {
         const { stdout, stderr } = await execPromise(

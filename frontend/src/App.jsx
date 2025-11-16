@@ -136,7 +136,7 @@ function App() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const configResponse = await client.GET('/config')
+        const configResponse = await client.GET('/api/config')
 
         if (configResponse.error) {
           throw new Error('Failed to fetch configuration')
@@ -186,7 +186,7 @@ function App() {
           setServerData(newServerData)
           setServerExternalData(useExternalData ? mockExternalData : newServerData)
         } else {
-          const statusResponse = await client.GET('/status')
+          const statusResponse = await client.GET('/api/status')
 
           if (statusResponse.error) {
             throw new Error('Failed to fetch server status')

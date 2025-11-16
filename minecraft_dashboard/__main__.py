@@ -7,8 +7,10 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from minecraft_dashboard.api import DashboardApi
 from minecraft_dashboard.config import Config
@@ -45,6 +47,17 @@ app.add_middleware(
 )
 
 
+class SPAStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope):
+        try:
+            return await super().get_response(path, scope)
+        except (HTTPException, StarletteHTTPException) as ex:
+            if ex.status_code == 404:
+                return await super().get_response("index.html", scope)
+            else:
+                raise ex
+
+
 def main():
     global api_instance, configuration_watcher
 
@@ -69,11 +82,17 @@ def main():
     )
 
     api_instance = DashboardApi(config)
-    app.include_router(api_instance.router)
+    api_app = FastAPI()
+    api_app.include_router(api_instance.router)
+    app.mount("/api", api_app)
 
     configuration_watcher = ConfigurationWatcher(
         config, api_instance.reload_configuration
     )
+
+    static_dir = Path(__file__).parent / "static"
+    if static_dir.exists():
+        app.mount("/", SPAStaticFiles(directory=static_dir, html=False), name="static")
 
     if arguments.generate_openapi:
         output_path = Path(arguments.generate_openapi)
