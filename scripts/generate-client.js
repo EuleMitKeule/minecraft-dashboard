@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { existsSync } from 'fs';
-import { mkdir, writeFile, unlink } from 'fs/promises';
+import { mkdir, unlink, writeFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
