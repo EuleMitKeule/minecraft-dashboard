@@ -465,6 +465,11 @@ class NetUtils:
             timeout=timeout,
         )
 
+        if not latencies:
+            raise ValueError(f"Could not measure latency to {host}:{port}")
+
+        logging.debug(f"Measured latencies to {host}:{port} - {latencies}")
+
         mean_latency = sum(latencies) / len(latencies) if latencies else float("inf")
         return mean_latency
 

@@ -6,7 +6,6 @@ RUN npm install
 
 COPY frontend ./
 COPY scripts ../scripts
-RUN rm ./.env
 
 RUN apk add --no-cache python3 curl ca-certificates
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
